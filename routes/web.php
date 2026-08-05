@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
@@ -16,6 +17,11 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'permission:view roles'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
+});
+
+Route::middleware(['auth', 'permission:view audit logs'])->group(function () {
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/audit-logs/{activityLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
 });
 
 Route::middleware('auth')->group(function () {
