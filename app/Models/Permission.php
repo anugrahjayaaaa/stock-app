@@ -4,11 +4,17 @@ namespace App\Models;
 
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Permission extends SpatiePermission
 {
     use LogsActivity;
 
-    protected static $logOnlyDirty = true;
-    protected static $logAttributes = ['name', 'guard_name'];
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'guard_name'])
+            ->logOnlyDirty()
+            ->useLogName('permission');
+    }
 }

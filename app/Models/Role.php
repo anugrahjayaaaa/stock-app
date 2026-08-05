@@ -4,13 +4,17 @@ namespace App\Models;
 
 use Spatie\Permission\Models\Role as SpatieRole;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Role extends SpatieRole
 {
     use LogsActivity;
 
-    protected static $logOnlyDirty = true;
-    protected static $logAttributes = ['name', 'guard_name'];
-
-    protected static $logName = 'role';
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'guard_name'])
+            ->logOnlyDirty()
+            ->useLogName('role');
+    }
 }
