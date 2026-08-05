@@ -20,7 +20,6 @@ class RoleController extends Controller
 
         return view('roles.index', compact('roles'));
     }
-
     public function create(): View
     {
         Gate::authorize('create roles');
@@ -52,6 +51,15 @@ class RoleController extends Controller
         $role->load('permissions');
 
         return view('roles.edit', compact('role', 'permissions'));
+    }
+
+    public function show(Role $role): View
+    {
+        Gate::authorize('view roles');
+
+        $permissions = $role->permissions()->paginate(10);
+
+        return view('roles.show', compact('role', 'permissions'));
     }
 
     public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
