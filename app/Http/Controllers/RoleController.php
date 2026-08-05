@@ -2,36 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Gate;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the roles.
-     */
-    public function index(Request $request): View
+    public function index(): View
     {
         Gate::authorize('view roles');
 
-        $query = Role::withCount('permissions');
-
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%');
-        }
-
-        $roles = $query->paginate(10);
+        $roles = Role::withCount('permissions')->paginate(10);
 
         return view('roles.index', compact('roles'));
     }
 
-    /**
-     * Show the form for creating a new role.
-     */
     public function create(): View
     {
         Gate::authorize('create roles');
@@ -41,18 +30,11 @@ class RoleController extends Controller
         return view('roles.create', compact('permissions'));
     }
 
-    /**
-     * Store a newly created role in storage.
-     */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRoleRequest $request): RedirectResponse
     {
         Gate::authorize('create roles');
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name'],
-        ]);
-
-        $role = Role::create(['name' => $request->input('name'), 'guard_name' => 'web']);
+        $role = Role::create(['name' => $request->validated('name'), 'guard_name' => 'web']);
 
         if ($request->filled('permissions')) {
             $role->syncPermissions($request->input('permissions'));
@@ -62,19 +44,6 @@ class RoleController extends Controller
             ->with('success', 'Role created successfully.');
     }
 
-    /**
-     * Display the specified role.
-     */
-    public function show(Role $role): View
-    {
-        Gate::authorize('view roles');
-
-        return view('roles.show', compact('role'));
-    }
-
-    /**
-     * Show the form for editing the specified role.
-     */
     public function edit(Role $role): View
     {
         Gate::authorize('edit roles');
@@ -85,18 +54,11 @@ class RoleController extends Controller
         return view('roles.edit', compact('role', 'permissions'));
     }
 
-    /**
-     * Update the specified role in storage.
-     */
-    public function update(Request $request, Role $role): RedirectResponse
+    public function update(UpdateRoleRequest $request, Role $role): RedirectResponse
     {
         Gate::authorize('edit roles');
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:roles,name,' . $role->id],
-        ]);
-
-        $role->update(['name' => $request->input('name')]);
+        $role->update(['name' => $request->validated('name')]);
 
         if ($request->filled('permissions')) {
             $role->syncPermissions($request->input('permissions'));
@@ -106,9 +68,6 @@ class RoleController extends Controller
             ->with('success', 'Role updated successfully.');
     }
 
-    /**
-     * Remove the specified role from storage.
-     */
     public function destroy(Role $role): RedirectResponse
     {
         Gate::authorize('delete roles');

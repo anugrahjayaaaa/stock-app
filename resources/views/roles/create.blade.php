@@ -27,7 +27,7 @@
                     <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         @foreach ($permissions as $permission)
                             <label class="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}"
+                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 <span>{{ $permission->name }}</span>
                             </label>

@@ -31,7 +31,7 @@
                                 @endcan
                                 @can('delete roles')
                                     <form method="POST" action="{{ route('roles.destroy', $role) }}" class="inline"
-                                          x-data="{ confirm: false }" @submit.prevent="confirm ? $el.submit() : show = true">
+                                          x-data="{ show: false }" @submit.prevent="show = true">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button"

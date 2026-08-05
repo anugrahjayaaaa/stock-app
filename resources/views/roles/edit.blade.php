@@ -28,13 +28,16 @@
                     <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         @foreach ($permissions as $permission)
                             <label class="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}"
-                                       {{ $role->permissions->contains($permission) ? 'checked' : '' }}
+                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                       {{ $role->permissions->pluck('name')->contains($permission->name) ? 'checked' : '' }}
                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 <span>{{ $permission->name }}</span>
                             </label>
                         @endforeach
                     </div>
+                    @error('permissions')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="flex justify-end">
