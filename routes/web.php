@@ -15,7 +15,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'permission:view roles'])->group(function () {
     Route::resource('roles', RoleController::class);
-    Route::resource('permissions', PermissionController::class)->only(['index']);
+    Route::resource('permissions', PermissionController::class);
 });
 
 Route::middleware('auth')->group(function () {

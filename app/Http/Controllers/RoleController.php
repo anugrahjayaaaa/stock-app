@@ -18,7 +18,7 @@ class RoleController extends Controller
     {
         Gate::authorize('view roles');
 
-        $query = Role::with('permissions');
+        $query = Role::withCount('permissions');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->input('search') . '%');
