@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\LogOptions;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -32,9 +34,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function getActivitylogOptions(): ActivityLogOptions
+    public function getActivitylogOptions(): LogOptions
     {
-        return ActivityLogOptions::defaults()
+        return LogOptions::defaults()
             ->logOnly(['name', 'email', 'password'])
             ->useLogName('user');
     }
