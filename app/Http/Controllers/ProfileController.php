@@ -34,6 +34,12 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        activity('profile')
+            ->by($request->user())
+            ->event('profile_updated')
+            ->withProperties(['ip_address' => request()->ip()])
+            ->log('profile_updated');
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -47,6 +53,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        activity('profile')
+            ->by($user)
+            ->event('account_deleted')
+            ->withProperties(['ip_address' => request()->ip()])
+            ->log('account_deleted');
 
         Auth::logout();
 

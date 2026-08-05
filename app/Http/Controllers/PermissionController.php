@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Spatie\Permission\Models\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;

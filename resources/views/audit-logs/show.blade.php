@@ -17,18 +17,41 @@
                     </div>
 
                     <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('By User') }}</span>
-                        <span class="font-medium">{{ $activityLog->causer?->name }} ({{ $activityLog->causer?->email }})</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Performed By') }}</span>
+                        <span class="font-medium">{{ $activityLog->causer?->name ?? __('System / Automated') }}</span>
+                        @if($activityLog->causer?->email)
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $activityLog->causer->email }}</div>
+                        @endif
                     </div>
 
                     <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Subject Type') }}</span>
-                        <span class="font-medium">{{ $activityLog->subject_type ?? __('N/A') }}</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Description') }}</span>
+                        <span class="font-medium">{{ $activityLog->description ?? __('No description') }}</span>
                     </div>
 
                     <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Subject ID') }}</span>
-                        <span class="font-medium">{{ $activityLog->subject_id ?? __('N/A') }}</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Affected Record') }}</span>
+                        @php
+                            $subjectLabel = match($activityLog->subject_type) {
+                                'App\Models\Role' => 'Role',
+                                'App\Models\Permission' => 'Permission',
+                                'App\Models\User' => 'User',
+                                default => $activityLog->subject_type ? class_basename($activityLog->subject_type) : __('Unknown')
+                            };
+                        @endphp
+                        <span class="font-medium">{{ $subjectLabel }}</span>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            @if($activityLog->subject_type === 'App\Models\Role')
+                                {{ $activityLog->subject->name ?? '' }}
+                            @elseif($activityLog->subject_type === 'App\Models\Permission')
+                                {{ $activityLog->subject->name ?? '' }}
+                            @elseif($activityLog->subject_type === 'App\Models\User')
+                                {{ $activityLog->subject->email ?? '' }}
+                            @endif
+                            @if($activityLog->subject_id)
+                                <span class="ml-2 text-xs text-gray-400">#{{ $activityLog->subject_id }}</span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -42,7 +65,7 @@
                     </div>
 
                     <div>
-                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Properties') }}</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('Changes') }}</span>
                         <pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-900/50 rounded-md text-xs text-gray-800 dark:text-gray-200 overflow-x-auto">{{ json_encode($activityLog->properties, JSON_PRETTY_PRINT) }}</pre>
                     </div>
 

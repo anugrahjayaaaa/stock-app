@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Activity as BaseActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ActivityLog extends BaseActivity
 {
@@ -23,13 +23,13 @@ class ActivityLog extends BaseActivity
         'properties' => 'array',
     ];
 
-    public function subject()
+    public function getPropertiesAttribute($value)
     {
-        return $this->morphTo();
+        return collect($value);
     }
 
-    public function causer()
+    public function setPropertiesAttribute($value)
     {
-        return $this->morphTo();
+        return $this->attributes['properties'] = is_array($value) ? collect($value) : $value;
     }
 }

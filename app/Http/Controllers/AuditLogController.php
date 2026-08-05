@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
-use App\Models\Role;
-use App\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -34,6 +32,14 @@ class AuditLogController extends Controller
             $query->where('event', $request->input('event'));
         }
 
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
         $activityLogs = $query->paginate(10);
 
         return view('audit-logs.index', compact('activityLogs'));
@@ -41,7 +47,7 @@ class AuditLogController extends Controller
 
     public function show(ActivityLog $activityLog): View
     {
-        Gate::authorize('view audit logs');
+        Gate::authorize('view audit log details');
 
         $activityLog->load('causer', 'subject');
 
