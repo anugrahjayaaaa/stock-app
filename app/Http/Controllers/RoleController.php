@@ -7,16 +7,23 @@ use App\Http\Requests\UpdateRoleRequest;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Gate;
 
 class RoleController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('view roles');
 
-        $roles = Role::withCount('permissions')->paginate(10);
+        $query = Role::withCount('permissions');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $roles = $query->paginate(10);
 
         return view('roles.index', compact('roles'));
     }
