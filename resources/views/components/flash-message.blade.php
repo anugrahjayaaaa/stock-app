@@ -1,13 +1,24 @@
 @if (session('success'))
-    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition
-         class="mb-4 rounded-lg border-l-4 border-green-500 bg-green-50 dark:bg-green-900/50 p-4 text-green-800 dark:text-green-100">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
 
 @if (session('error'))
-    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition
-         class="mb-4 rounded-lg border-l-4 border-red-500 bg-red-50 dark:bg-red-900/50 p-4 text-red-800 dark:text-red-100">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $message)
+                <li>{{ $message }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif

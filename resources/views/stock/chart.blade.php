@@ -1,69 +1,68 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@extends('layouts.app')
+@section('header', __('Stock Chart'))
 
-    <title>Stock Chart - {{ config('app.name', 'Laravel') }}</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased">
-    <!-- Top Header -->
-    @include('layouts.header')
-
-    <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-        <!-- Left Sidebar Navigation -->
-        @include('layouts.sidebar')
-
-        <!-- Main Content -->
-        <main class="flex-1 lg:ml-64">
-            <!-- Page Heading -->
-            <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Stock Chart</h1>
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                <!-- TradingView Widget -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-                    <div id="tradingview-chart" style="height: 600px;"></div>
-                </div>
-            </div>
-        </main>
+@section('content')
+<div class="card card-primary card-outline">
+    <div class="card-header d-flex align-items-center">
+        <h3 class="card-title mb-0">IDX TradingView</h3>
+        <div class="card-tools ms-auto">
+            <select id="tv-symbol" class="form-select form-select-sm d-inline-block" style="width:auto;">
+                <option value="IDX:BBCA">BBCA</option>
+                <option value="IDX:BBRI">BBRI</option>
+                <option value="IDX:TLKM">TLKM</option>
+                <option value="IDX:ASII">ASII</option>
+                <option value="IDX:GOTO">GOTO</option>
+                <option value="IDX:ANTM">ANTM</option>
+            </select>
+        </div>
     </div>
+    <div class="card-body">
+        <div id="tradingview-chart" style="height: 600px;"></div>
+    </div>
+</div>
 
-    <!-- TradingView Widget Script -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tradingview-widget/1.0.0/tradingview-widget.min.js"></script>
-    <script type="text/javascript">
-        new TradingView.widget({
-            "autosize": true,
-            "symbol": "IDX:BBCA",
-            "interval": "D",
-            "timezone": "Asia/Jakarta",
-            "theme": "light",
-            "style": "1",
-            "locale": "id",
-            "toolbar_bg": "#f1f3f6",
-            "enable_publishing": false,
-            "withdateranges": true,
-            "allow_symbol_change": true,
-            "container_id": "tradingview-chart",
-            "hide_top_toolbar": false,
-            "hide_legend": false,
-            "save_image": false,
-            "calendar": false,
-            "hide_volume": false,
-            "support_host": "https://www.tradingview.com"
+@push('scripts')
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/tradingview-widget@1.0.0/tradingview-widget.min.js"></script>
+<script type="text/javascript">
+    (function () {
+        const container = document.getElementById('tradingview-chart');
+        const symbolSelect = document.getElementById('tv-symbol');
+
+        function theme() {
+            return document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+        }
+
+        let widget = new TradingView.widget({
+            autosize: true,
+            symbol: symbolSelect.value,
+            interval: 'D',
+            timezone: 'Asia/Jakarta',
+            theme: theme(),
+            style: '1',
+            locale: 'id',
+            toolbar_bg: '#f1f3f6',
+            enable_publishing: false,
+            withdateranges: true,
+            allow_symbol_change: true,
+            container_id: 'tradingview-chart',
+            hide_top_toolbar: false,
+            hide_legend: false,
+            save_image: false,
+            calendar: false,
+            hide_volume: false,
+            support_host: 'https://www.tradingview.com'
         });
-    </script>
-</body>
-</html>
+
+        symbolSelect.addEventListener('change', () => {
+            container.innerHTML = '';
+            widget = new TradingView.widget(Object.assign(widget.options_, {
+                symbol: symbolSelect.value,
+                container_id: 'tradingview-chart'
+            }));
+        });
+
+        document.addEventListener('theme-changed', () => location.reload());
+    })();
+</script>
+@endpush
+@endsection

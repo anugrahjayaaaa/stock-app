@@ -23,7 +23,12 @@ class RoleController extends Controller
             $query->where('name', 'like', '%' . $request->input('search') . '%');
         }
 
-        $roles = $query->paginate(10);
+        $sortable = ['name', 'permissions_count'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'name';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($sort, $direction);
+
+        $roles = $query->paginate(10)->withQueryString();
 
         return view('roles.index', compact('roles'));
     }
