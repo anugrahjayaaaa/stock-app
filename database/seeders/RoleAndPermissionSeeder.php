@@ -3,40 +3,54 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use App\Models\Permission;
 
 class RoleAndPermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()['cache']->forget('spatie.permission.cache');
-
+        // Create Permissions
         $permissions = [
-            'view roles', 'create roles', 'edit roles', 'delete roles',
-            'view permissions', 'create permissions', 'edit permissions', 'delete permissions',
+            // Roles
+            ['name' => 'view roles', 'guard_name' => 'web'],
+            ['name' => 'create roles', 'guard_name' => 'web'],
+            ['name' => 'edit roles', 'guard_name' => 'web'],
+            ['name' => 'delete roles', 'guard_name' => 'web'],
+
+            // Permissions
+            ['name' => 'view permissions', 'guard_name' => 'web'],
+            ['name' => 'create permissions', 'guard_name' => 'web'],
+            ['name' => 'edit permissions', 'guard_name' => 'web'],
+            ['name' => 'delete permissions', 'guard_name' => 'web'],
+
+            // Audit Logs
+            ['name' => 'view audit logs', 'guard_name' => 'web'],
+            ['name' => 'view audit log details', 'guard_name' => 'web'],
         ];
-        foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+
+        $permissionMap = [];
+        foreach ($permissions as $permissionData) {
+            $permission = Permission::firstOrCreate($permissionData);
+            $permissionMap[$permissionData['name']] = $permission->id;
         }
 
-        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
-        $user = Role::firstOrCreate(['name' => 'User', 'guard_name' => 'web']);
+        // Create Roles
+        $roles = [
+            ['name' => 'Super Admin'],
+            ['name' => 'Admin'],
+            ['name' => 'User'],
+            ['name' => 'Admin Staff'],
+            ['name' => 'Editor'],
+            ['name' => 'Auditor'],
+        ];
 
-        $superAdmin->givePermissionTo(Permission::all());
-        $user->givePermissionTo(['view roles']);
-
-        $super = User::firstOrCreate(
-            ['email' => 'superadmin@stock.app'],
-            ['name' => 'Super Admin', 'password' => bcrypt('password123')]
-        );
-        $super->assignRole('Super Admin');
-
-        $usr = User::firstOrCreate(
-            ['email' => 'user@stock.app'],
-            ['name' => 'User', 'password' => bcrypt('password123')]
-        );
-        $usr->assignRole('User');
+        $roleMap = [];
+        foreach ($roles as $roleData) {
+            $role = Role::firstOrCreate($roleData);
+            $roleMap[$roleData['name']] = $role->id;
+            $role->syncPermissions($permissions);
+        }
     }
 }

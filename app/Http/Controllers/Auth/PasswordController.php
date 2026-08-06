@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
 class PasswordController extends Controller
 {
@@ -23,6 +24,12 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        activity('auth')
+            ->by($request->user())
+            ->event('password_changed')
+            ->withProperties(['ip_address' => request()->ip()])
+            ->log('password_changed');
 
         return back()->with('status', 'password-updated');
     }
