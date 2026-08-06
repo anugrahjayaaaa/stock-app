@@ -1,3 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Stock app customizations on top of AdminLTE 4 / Bootstrap 5.3 */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+/* Independent scroll: whole grid pinned to viewport, only main content scrolls.
+   Sidebar keeps its own internal .sidebar-wrapper scroll (native AdminLTE 4). */
+html, body { height: 100%; }
+.app-wrapper { height: 100vh; overflow: hidden; }
+.app-main { overflow-y: auto; }
+
+/* Separate content from sidebar so it doesn't blend in (theme-aware). */
+.app-sidebar { border-right: 1px solid var(--bs-border-color); }
+.app-main { background-color: var(--bs-tertiary-bg); }
+.app-content { padding: 1.25rem 1.5rem; }
+
+/* Sidebar brand: keep brand centered; toggle on the right, centered when minimized. */
+.sidebar-brand { position: relative; }
+.sidebar-brand .sb-toggle {
+    position: absolute;
+    right: .5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: .25rem .5rem;
+}
+body.sidebar-collapse .sidebar-brand .sb-toggle {
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+}
+
+/* Win over AdminLTE's print stylesheet, which forces .app-sidebar to 200px!important
+   and breaks mini-collapse on screen. Re-assert mini width with !important. */
+@media screen {
+    .sidebar-mini.sidebar-collapse .app-sidebar {
+        min-width: 4.6rem !important;
+        max-width: 4.6rem !important;
+    }
+}
+
+/* Pagination */
+.pagination { margin-bottom: 0; }
+.pagination-info { font-size: .875rem; color: var(--bs-secondary-color); }
+
+/* Sortable table headers: make the clickable affordance obvious. */
+th.sortable a { cursor: pointer; }
+th.sortable a:hover { color: var(--bs-primary) !important; }
+th.sortable .fa-sort { opacity: .45; }

@@ -31,3 +31,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+ Route::get('/stock/chart', [App\Http\Controllers\StockController::class, 'showChart'])->name('stock.chart');

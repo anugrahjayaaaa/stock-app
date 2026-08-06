@@ -23,7 +23,12 @@ class PermissionController extends Controller
             $query->where('name', 'like', '%' . $request->input('search') . '%');
         }
 
-        $permissions = $query->paginate(10);
+        $sortable = ['name'];
+        $sort = in_array($request->input('sort'), $sortable) ? $request->input('sort') : 'name';
+        $direction = $request->input('direction') === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($sort, $direction);
+
+        $permissions = $query->paginate(10)->withQueryString();
 
         return view('permissions.index', compact('permissions'));
     }

@@ -1,52 +1,49 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Edit Role') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
+@section('header', __('Edit Role'))
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <x-flash-message />
+@section('content')
+<div class="card">
+    <div class="card-header"><h3 class="card-title">{{ __('Edit Role') }}</h3></div>
+    <div class="card-body">
+        <x-flash-message />
+        <form method="POST" action="{{ route('roles.update', $role) }}">
+            @csrf
+            @method('PUT')
 
-            <form method="POST" action="{{ route('roles.update', $role) }}"
-                  class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 space-y-4">
-                @csrf
-                @method('PUT')
+            <div class="mb-3">
+                <label for="name" class="form-label">{{ __('Role Name') }}</label>
+                <input type="text" id="name" name="name" value="{{ old('name', $role->name) }}" required
+                       class="form-control @error('name') is-invalid @enderror">
+                @error('name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
 
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Role Name') }}</label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $role->name) }}" required
-                           class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+            <div class="mb-3">
+                <label class="form-label d-block">{{ __('Permissions') }}</label>
+                <div class="row">
+                    @foreach ($permissions as $permission)
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="permissions[]"
+                                       value="{{ $permission->name }}" id="perm-{{ $permission->id }}"
+                                       {{ $role->permissions->pluck('name')->contains($permission->name) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="perm-{{ $permission->id }}">
+                                    {{ $permission->name }}
+                                </label>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
+                @error('permissions')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                @enderror
+            </div>
 
-                <div>
-                    <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Permissions') }}</span>
-                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        @foreach ($permissions as $permission)
-                            <label class="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                                       {{ $role->permissions->pluck('name')->contains($permission->name) ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span>{{ $permission->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('permissions')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-md">
-                        {{ __('Update Role') }}
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">{{ __('Update Role') }}</button>
+            </div>
+        </form>
     </div>
-</x-app-layout>
+</div>
+@endsection
