@@ -30,6 +30,13 @@
             ['time' => '09:21:55', 'action' => 'BUY',  'buyer' => 'YP', 'seller' => 'CC', 'market' => 'RG', 'inv' => 'D', 'price' => '9,800', 'vol' => '1,750', 'grouped' => false],
             ['time' => '09:22:39', 'action' => 'SELL', 'buyer' => 'YP', 'seller' => 'NH', 'market' => 'RG', 'inv' => 'F', 'price' => '9,755', 'vol' => '700', 'grouped' => false],
         ];
+        $pvaRows = [
+            ['date' => '2026-08-03', 'change' => 1.8,  'volRatio' => 1.9, 'status' => 'Accumulation', 'tag' => 'Strong demand, breakout'],
+            ['date' => '2026-08-04', 'change' => 0.4,  'volRatio' => 0.8, 'status' => 'Weak Rally',   'tag' => 'Low participation'],
+            ['date' => '2026-08-05', 'change' => -0.6, 'volRatio' => 0.7, 'status' => 'Retest',       'tag' => 'Healthy pullback'],
+            ['date' => '2026-08-06', 'change' => -2.1, 'volRatio' => 2.3, 'status' => 'Distribution', 'tag' => 'Heavy selling'],
+            ['date' => '2026-08-07', 'change' => 1.2,  'volRatio' => 1.5, 'status' => 'Accumulation', 'tag' => 'Bid support'],
+        ];
     @endphp
     <div class="card card-primary card-outline" id="analysis-page">
         <div class="card-header d-flex flex-column gap-2">
@@ -71,17 +78,15 @@
                         :vol="'52,800'" :rows="$doneRows" />
                 </div>
                 {{-- PV analysis --}}
-                <div class="col-lg-6">
-                    <div class="card card-outline card-secondary">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Price-Volume Analysis (RYCAD / WYFCOOF)</h5>
-                        </div>
-                        <div class="card-body text-muted">Placeholder — PV signals from OHLC + volume.</div>
-                    </div>
+                <div class="col-lg-6 d-flex">
+                    <x-price-volume-analysis :start="$tradeDay" :end="$tradeDay" :score="62"
+                        :summary="'Net accumulation with above-average volume on up days; distribution day on 2026-08-06 was an exception. Bias mildly bullish.'"
+                        :stats="['accumulation' => 2, 'weakRally' => 1, 'retest' => 1, 'distribution' => 1]"
+                        :rows="$pvaRows" />
                 </div>
                 {{-- Technikal --}}
-                <div class="col-lg-6">
-                    <div class="card card-outline card-secondary">
+                <div class="col-lg-6 d-flex">
+                    <div class="card card-outline card-secondary h-100">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Technikal Analysis</h5>
                         </div>
@@ -89,8 +94,8 @@
                     </div>
                 </div>
                 {{-- Smart-money classification --}}
-                <div class="col-lg-6">
-                    <div class="card card-outline card-secondary">
+                <div class="col-lg-6 d-flex">
+                    <div class="card card-outline card-secondary h-100">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Buyer/Seller Classification</h5>
                         </div>
@@ -98,8 +103,8 @@
                     </div>
                 </div>
                 {{-- Accumulation range + AVG lines --}}
-                <div class="col-lg-6">
-                    <div class="card card-outline card-secondary">
+                <div class="col-lg-6 d-flex">
+                    <div class="card card-outline card-secondary h-100">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Accumulation Range & AVG Lines</h5>
                         </div>
