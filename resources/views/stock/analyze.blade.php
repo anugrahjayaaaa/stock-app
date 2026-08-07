@@ -5,20 +5,8 @@
 
 @section('content')
     @php
-        // ponytail: broker-summary / done-detail / PVA keep static UI mock; impostor + leaderboard
-        // data now comes from StockAnalysisController (built from brokers table). Swap with Invezgo later.
-        $doneRows = [
-            ['time' => '09:15:22', 'action' => 'BUY',  'buyer' => 'YP', 'seller' => 'CC', 'market' => 'RG', 'inv' => 'D', 'price' => '9,800', 'vol' => '50,000', 'grouped' => true],
-            ['time' => '09:15:30', 'action' => 'SELL', 'buyer' => 'NI', 'seller' => 'AZ', 'market' => 'RG', 'inv' => 'F', 'price' => '9,775', 'vol' => '1,250', 'grouped' => false],
-            ['time' => '09:16:05', 'action' => 'BUY',  'buyer' => 'PD', 'seller' => 'AZ', 'market' => 'RG', 'inv' => 'F', 'price' => '9,805', 'vol' => '1,250', 'grouped' => false],
-            ['time' => '09:16:48', 'action' => 'SELL', 'buyer' => 'NH', 'seller' => 'YP', 'market' => 'RG', 'inv' => 'D', 'price' => '9,770', 'vol' => '900', 'grouped' => false],
-            ['time' => '09:17:40', 'action' => 'BUY',  'buyer' => 'CC', 'seller' => 'NH', 'market' => 'RG', 'inv' => 'D', 'price' => '9,810', 'vol' => '2,400', 'grouped' => false],
-            ['time' => '09:18:20', 'action' => 'SELL', 'buyer' => 'PD', 'seller' => 'AZ', 'market' => 'NG', 'inv' => 'F', 'price' => '9,765', 'vol' => '1,100', 'grouped' => false],
-            ['time' => '09:19:12', 'action' => 'BUY',  'buyer' => 'AZ', 'seller' => 'PD', 'market' => 'TN', 'inv' => 'F', 'price' => '9,815', 'vol' => '600', 'grouped' => false],
-            ['time' => '09:20:02', 'action' => 'SELL', 'buyer' => 'CC', 'seller' => 'PD', 'market' => 'RG', 'inv' => 'D', 'price' => '9,760', 'vol' => '2,050', 'grouped' => false],
-            ['time' => '09:21:55', 'action' => 'BUY',  'buyer' => 'YP', 'seller' => 'CC', 'market' => 'RG', 'inv' => 'D', 'price' => '9,800', 'vol' => '1,750', 'grouped' => false],
-            ['time' => '09:22:39', 'action' => 'SELL', 'buyer' => 'YP', 'seller' => 'NH', 'market' => 'RG', 'inv' => 'F', 'price' => '9,755', 'vol' => '700', 'grouped' => false],
-        ];
+        // ponytail: PVA keeps static UI mock; swap with GoAPI historical OHLC later.
+        // $doneRows removed: done-detail widget commented out (needs Invezgo tape data).
         $pvaRows = [
             ['date' => '2026-08-03', 'change' => 1.8,  'volRatio' => 1.9, 'status' => 'Accumulation', 'tag' => 'Strong demand, breakout'],
             ['date' => '2026-08-04', 'change' => 0.4,  'volRatio' => 0.8, 'status' => 'Weak Rally',   'tag' => 'Low participation'],
@@ -55,18 +43,22 @@
                         </div>
                     </div>
                 </div>
-                {{-- Broker summary --}}
+                {{-- Broker summary — COMMENTED: needs Invezgo broker-summary data (GoAPI free tier has no broker-level data). --}}
+                {{--
                 <div class="col-lg-6 d-flex">
                     <x-broker-summary :ticker="'BBCA'" :avg="'10,224'" :vol="'18,500 Lot'" :val="'Rp 189.2M'"
                         :accum="'ACCUMULATION'" :buy-pct="58" :sell-pct="42" :buyers="$buyers" :sellers="$sellers"
                         :trade-day="$tradeDay" />
                 </div>
-                {{-- Done / detail transactions --}}
+                --}}
+                {{-- Done / detail transactions — COMMENTED: needs Invezgo transaction-tape data (GoAPI free tier has no per-trade tape). --}}
+                {{--
                 <div class="col-lg-6 d-flex">
                     <x-done-detail-transactions :ticker="'BBCA'" :price="'10,225'" :change="'-25 / -0.2%'"
                         :vol="'52,800'" :rows="$doneRows" />
                 </div>
-                {{-- PV analysis --}}
+                --}}
+                {{-- PV analysis — KEEP: derivable from GoAPI historical OHLC. --}}
                 <div class="col-lg-6 d-flex">
                     <x-price-volume-analysis :start="$tradeDay" :end="$tradeDay" :score="62"
                         :summary="'Net accumulation with above-average volume on up days; distribution day on 2026-08-06 was an exception. Bias mildly bullish.'"
@@ -84,18 +76,24 @@
                         :patterns="$techPatterns"
                         :level-pos="['s2' => 5, 's1' => 25, 'price' => 60, 'r1' => 75, 'r2' => 95]" />
                 </div>
-                {{-- Smart-money classification / impostor --}}
+                {{-- Smart-money classification / impostor — COMMENTED: needs Invezgo broker-behavior data (GoAPI free tier has no broker-level data). --}}
+                {{--
                 <div class="col-lg-6 d-flex">
                     <x-broker-impostor-widget :buyers="$buyersCls" :sellers="$sellersCls" :retail="$retail" />
                 </div>
-                {{-- Accumulation range + AVG lines --}}
+                --}}
+                {{-- Accumulation range + AVG lines — COMMENTED: needs Invezgo accumulated-net-per-broker data (GoAPI free tier has no broker-level data). --}}
+                {{--
                 <div class="col-lg-6 d-flex">
                     <x-accumulation-avg-widget :data="$accumulation" />
                 </div>
-                {{-- Broker inventory chart + AI summary --}}
+                --}}
+                {{-- Broker inventory chart + AI summary — COMMENTED: needs Invezgo per-broker inventory data (GoAPI free tier has no broker-level data). --}}
+                {{--
                 <div class="col-12">
                     <x-broker-inventory-chart :inventory="$inventory" />
                 </div>
+                --}}
             </div>
         </div>
     </div>

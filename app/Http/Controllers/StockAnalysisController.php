@@ -18,9 +18,9 @@ class StockAnalysisController extends Controller
     /**
      * Render the stock analysis page.
      *
-     * Gathers the broker master from DB and builds all widget datasets
-     * (impostor leaderboard, accumulation range, inventory series) plus the
-     * lightweight UI-mock rows for broker-summary / done-detail / PVA.
+     * Phase 1 uses GoAPI (free tier): price/volume, PV analysis and technical
+     * widgets are supported. Broker-level widgets (summary, tape, impostor,
+     * accumulation, inventory) need Invezgo and are commented out in the view.
      * Swap the mock builders for Invezgo payloads once the API is wired.
      */
     public function index(): View
@@ -28,41 +28,15 @@ class StockAnalysisController extends Controller
         $stocks = Stock::orderBy('code')->get(['code', 'name']);
         $tradeDay = $this->tradingDay->defaultTradeDay();
 
-        // ponytail: real broker master from DB; derived mock activity (net/pct/haka/haki/score).
-        // Swap with Invezgo /analysis/summary/broker/{code} when API is wired.
-        $brokers = Broker::orderBy('code')->get(['code', 'name', 'category']);
-        $byCode = $brokers->keyBy('code');
-
-        $buyers = $this->mockLeaders($brokers, 'buy');
-        $sellers = $this->mockLeaders($brokers, 'sell');
-        $retail = $this->mockRetail($brokers);
-
-        $buyersCls = $this->classifyBuyers($buyers, $byCode);
-        $sellersCls = $this->classifySellers($sellers, $byCode);
-
-        $accumulation = $this->mockAccumulation($brokers, $tradeDay);
-        $inventory = $this->mockInventory($brokers);
-
-        // broker-summary wants lighter rows (vol/val/avg as strings — UI mock shape).
-        $buyers = collect($buyers)->map(fn ($b) => [
-            'code' => $b['code'], 'vol' => number_format(($this->seed($b['code']) * 4000) + 1000),
-            'val' => number_format($this->seed($b['code']) * 50, 1), 'avg' => '10,2'.rand(10, 29),
-        ])->all();
-        $sellers = collect($sellers)->map(fn ($s) => [
-            'code' => $s['code'], 'vol' => number_format(($this->seed($s['code']) * 4000) + 1000),
-            'val' => number_format($this->seed($s['code']) * 50, 1), 'avg' => '10,2'.rand(10, 29),
-        ])->all();
-
         // ponytail: kept here to avoid touching the technical widget — forward the same shape.
+        // Derivable from GoAPI historical OHLC; replace with live pattern detection later.
         $techPatterns = [
             ['name' => 'Double Bottom', 'type' => 'Reversal', 'tp' => '10,650', 'sl' => '9,900', 'status' => 'Confirmed'],
             ['name' => 'Bullish Flag', 'type' => 'Continuation', 'tp' => '10,800', 'sl' => '10,050', 'status' => 'Forming'],
             ['name' => 'Triangle', 'type' => 'Continuation', 'tp' => '10,500', 'sl' => '9,950', 'status' => 'Forming'],
         ];
 
-        return view('stock.analyze', compact(
-            'stocks', 'tradeDay', 'buyers', 'sellers', 'buyersCls', 'sellersCls', 'retail', 'techPatterns', 'accumulation', 'inventory'
-        ));
+        return view('stock.analyze', compact('stocks', 'tradeDay', 'techPatterns'));
     }
 
     /**
