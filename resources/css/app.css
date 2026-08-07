@@ -44,3 +44,10 @@ body.sidebar-collapse .sidebar-brand .sb-toggle {
 th.sortable a { cursor: pointer; }
 th.sortable a:hover { color: var(--bs-primary) !important; }
 th.sortable .fa-sort { opacity: .45; }
+
+/* Broker classification: Swasta Lokal = purple (not a default Bootstrap color).
+   ponytail: single source; all broker-badge / impostor / broker-list call sites rely on this. */
+.bg-purple { --bs-bg-opacity: 1; background-color: #6f42c1 !important; }
+.bg-purple-subtle { background-color: rgba(111, 66, 193, 0.15) !important; }
+.text-purple { --bs-text-opacity: 1; color: #6f42c1 !important; }
+.border-purple { --bs-border-opacity: 1; border-color: #6f42c1 !important; }

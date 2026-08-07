@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             AuditLogPermissionSeeder::class,
             StockSeeder::class,
+            BrokerSeeder::class,
         ]);
 
         User::factory()->create([
