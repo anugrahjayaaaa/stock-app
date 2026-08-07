@@ -37,6 +37,11 @@
             ['date' => '2026-08-06', 'change' => -2.1, 'volRatio' => 2.3, 'status' => 'Distribution', 'tag' => 'Heavy selling'],
             ['date' => '2026-08-07', 'change' => 1.2,  'volRatio' => 1.5, 'status' => 'Accumulation', 'tag' => 'Bid support'],
         ];
+        $techPatterns = [
+            ['name' => 'Double Bottom', 'type' => 'Reversal', 'tp' => '10,650', 'sl' => '9,900', 'status' => 'Confirmed'],
+            ['name' => 'Bullish Flag', 'type' => 'Continuation', 'tp' => '10,800', 'sl' => '10,050', 'status' => 'Forming'],
+            ['name' => 'Triangle', 'type' => 'Continuation', 'tp' => '10,500', 'sl' => '9,950', 'status' => 'Forming'],
+        ];
     @endphp
     <div class="card card-primary card-outline" id="analysis-page">
         <div class="card-header d-flex flex-column gap-2">
@@ -86,12 +91,14 @@
                 </div>
                 {{-- Technikal --}}
                 <div class="col-lg-6 d-flex">
-                    <div class="card card-outline card-secondary h-100">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Technikal Analysis</h5>
-                        </div>
-                        <div class="card-body text-muted">Placeholder — RSI / MACD / MA signals.</div>
-                    </div>
+                    <x-technical-analysis-widget :ticker="'BBCA'" :price="'10,225'" :change="-0.2"
+                        :score-label="'Bullish'" :summary="'Price above S1 with MACD golden cross and RSI neutral; foreign flow positive over 20D. Bias bullish toward R1.'"
+                        :sr="['price' => '10,225', 's1' => '10,000', 's2' => '9,750', 'r1' => '10,450', 'r2' => '10,700', 'dS1' => '-2.2', 'dS2' => '-4.6', 'dR1' => '2.2', 'dR2' => '4.6']"
+                        :macd-state="'Golden Cross'" :macd-hist="'12.4'" :macd-trend="'up'"
+                        :rsi="54" :rsi-div="false"
+                        :foreign="['d1' => '+8.2M', 'd5' => '+22.5M', 'd20' => '+115.3M']"
+                        :patterns="$techPatterns"
+                        :level-pos="['s2' => 5, 's1' => 25, 'price' => 60, 'r1' => 75, 'r2' => 95]" />
                 </div>
                 {{-- Smart-money classification --}}
                 <div class="col-lg-6 d-flex">
