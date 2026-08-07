@@ -32,6 +32,7 @@ class StockAnalysisController extends Controller
         $sellersCls = $this->classifySellers($sellers, $byCode);
 
         $accumulation = $this->mockAccumulation($brokers, $tradeDay);
+        $inventory = $this->mockInventory($brokers);
 
         // broker-summary wants lighter rows (vol/val/avg as strings — UI mock shape).
         $buyers = collect($buyers)->map(fn ($b) => [
@@ -51,8 +52,70 @@ class StockAnalysisController extends Controller
         ];
 
         return view('stock.analyze', compact(
-            'stocks', 'tradeDay', 'buyers', 'sellers', 'buyersCls', 'sellersCls', 'retail', 'techPatterns', 'accumulation'
+            'stocks', 'tradeDay', 'buyers', 'sellers', 'buyersCls', 'sellersCls', 'retail', 'techPatterns', 'accumulation', 'inventory'
         ));
+    }
+
+    // ponytail: inventory series for the chart. Deterministic per-broker cumulative net over a date range.
+    // Swap with Invezgo /analysis/transactions/broker per day when API is wired.
+    private function mockInventory(Collection $brokers): array
+    {
+        $codes = ['AK', 'BK', 'CC', 'PD', 'YP', 'ZP', 'YU'];
+        $dates = [];
+        $d = now()->subDays(29);
+        for ($i = 0; $i < 30; $i++) {
+            $dates[] = $d->copy()->addDays($i)->format('Y-m-d');
+        }
+
+        $series = [];
+        $accum = []; $dist = [];
+        foreach ($codes as $code) {
+            if (! $brokers->contains('code', $code)) {
+                continue;
+            }
+            $r = $this->seed($code.'inv');
+            $sign = in_array($code, ['ZP', 'YU', 'YP']) ? -1 : 1;
+            $cum = 0;
+            $points = [];
+            foreach ($dates as $j => $date) {
+                $step = round($sign * ($r * 400 + 50) * (0.6 + 0.4 * sin($j / 4)));
+                $cum += $step;
+                $points[] = ['time' => $date, 'value' => $cum];
+            }
+            $series[] = [
+                'code' => $code,
+                'name' => optional($brokers->firstWhere('code', $code))->name ?? $code,
+                'side' => $sign > 0 ? 'buy' : 'sell',
+                'data' => $points,
+            ];
+            if ($sign > 0) $accum[] = ['code' => $code, 'name' => $series[count($series)-1]['name'], 'end' => $cum];
+            else $dist[] = ['code' => $code, 'name' => $series[count($series)-1]['name'], 'end' => $cum];
+        }
+
+        $price = collect($dates)->map(function ($date, $j) {
+            return ['time' => $date, 'value' => round(9800 + 600 * sin($j / 5) + $j * 12, 0)];
+        })->all();
+
+        // Net Bandar = sum of all cumulative at last date.
+        $netBandar = collect($series)->sum(fn ($s) => end($s['data'])['value']);
+
+        $score = $netBandar >= 0 ? min(100, 50 + (int) ($netBandar / 5000)) : max(0, 50 + (int) ($netBandar / 5000));
+
+        return [
+            'dates' => $dates,
+            'price' => $price,
+            'series' => $series,
+            'topAccum' => collect($accum)->sortByDesc('end')->take(3)->values()->all(),
+            'topDist' => collect($dist)->sortBy('end')->take(3)->values()->all(),
+            'netBandar' => (int) $netBandar,
+            'score' => (int) $score,
+            'phase' => $score >= 60 ? 'Mark-Up / Accumulation' : ($score <= 40 ? 'Distribution' : 'Consolidation'),
+            'summary' => $score >= 60
+                ? 'Price making higher lows while Net Bandar inventory stays positive — classic Mark-Up phase. Major accumulator leading the charge; distribution risk low unless price stalls above target.'
+                : ($score <= 40
+                    ? 'Net Bandar inventory flipping negative with price unable to hold gains — Distribution phase underway. Watch for breakdown below AVG support.'
+                    : 'Bandar inventory balanced; price coiling in range. Waiting for expansion — accumulation vs distribution not yet decisive.'),
+        ];
     }
 
     // ponytail: accumulation view data. Top buyers from DB brokers; AVG/value derived deterministically.

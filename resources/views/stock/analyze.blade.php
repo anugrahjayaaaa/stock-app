@@ -90,15 +90,9 @@
                 <div class="col-lg-6 d-flex">
                     <x-accumulation-avg-widget :data="$accumulation" />
                 </div>
-                {{-- AI analysis result --}}
+                {{-- Broker inventory chart + AI summary --}}
                 <div class="col-12">
-                    <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">AI Analysis Result</h5>
-                        </div>
-                        <div class="card-body text-muted" id="analysis-ai-result">Placeholder — output from
-                            trained/validated AI skill.</div>
-                    </div>
+                    <x-broker-inventory-chart :inventory="$inventory" />
                 </div>
             </div>
         </div>
