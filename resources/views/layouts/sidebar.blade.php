@@ -68,6 +68,20 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('stock.brokers') }}"
+                       class="nav-link {{ request()->routeIs('stock.brokers') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-building"></i>
+                        <p>Broker List</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('stock.analyze') }}"
+                       class="nav-link {{ request()->routeIs('stock.analyze') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-microscope"></i>
+                        <p>Stock Analysis</p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

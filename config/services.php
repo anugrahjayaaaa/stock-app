@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'api_co_id' => [
+        'key' => env('API_CO_ID_KEY'),
+    ],
+
 ];
