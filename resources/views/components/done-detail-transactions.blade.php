@@ -1,3 +1,5 @@
+{{-- Done Detail: per-trade transaction tape with market/investor/broker filters + Group Order toggle. --}}
+{{-- Props: ticker, price, change, vol (header stats), rows (array of trade objects). --}}
 <div class="card card-outline card-secondary h-100 d-flex flex-column">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0">Done Detail Transactions</h5>

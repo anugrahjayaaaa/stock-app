@@ -1,3 +1,7 @@
+{{-- Broker Inventory Chart + AI Bandarmology Summary. --}}
+{{-- Dual-pane lightweight-charts (price + cumulative inventory), zero base line, --}}
+{{-- per-broker green/red lines, glowing Net Bandar, interactive legend, AI summary card. --}}
+{{-- Props: inventory (array from StockAnalysisController::mockInventory). --}}
 @php
     // ponytail: data = $inventory from StockAnalysisController::mockInventory.
     $inv = $inventory;

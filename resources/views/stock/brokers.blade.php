@@ -1,4 +1,5 @@
 @extends('layouts.app')
+{{-- Broker List page: table of all brokers (Code / Sekuritas / Kategori) from the brokers table. --}}
 @section('header', __('Broker List'))
 
 @section('content')

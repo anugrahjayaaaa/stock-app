@@ -1,4 +1,6 @@
 @extends('layouts.app')
+{{-- Stock Analysis page: composes all analysis widgets (broksum, done-detail,
+     impostor, accumulation, inventory) fed by StockAnalysisController::index. --}}
 @section('header', __('Stock Analysis'))
 
 @section('content')

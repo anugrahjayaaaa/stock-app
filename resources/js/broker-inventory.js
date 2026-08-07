@@ -31,11 +31,12 @@ if (cfg) {
         crosshair: { mode: 1 },
     });
 
-    // Zero baseline.
+    // Zero baseline: flat line at value 0 separating accumulation (+) from distribution (−).
     const zero = invChart.addSeries(LineSeries, { color: '#787b86', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false });
     zero.setData(cfg.dates.map((d) => ({ time: d, value: 0 })));
 
-    // Per-broker lines (green/red shades) + glowing Net Bandar.
+    // Per-broker inventory lines (green shades for accumulators, red for distributors),
+    // keyed by code in seriesMap so the legend checkboxes can toggle visibility.
     const shades = { buy: ['#26a69a', '#2ebd85', '#37c871', '#43d98a'], sell: ['#ef5350', '#f0564f', '#f15a52', '#f25d54'] };
     const seriesMap = {};
     cfg.series.forEach((s, i) => {
@@ -46,6 +47,8 @@ if (cfg) {
         seriesMap[s.code] = line;
     });
 
+    // Net Bandar: sum of every broker's cumulative inventory per date, drawn with a
+    // wider accent line plus a faint zero price-line for emphasis.
     const net = invChart.addSeries(LineSeries, {
         color: '#ffd166', lineWidth: 3, priceLineVisible: false, title: 'Net Bandar',
         // glow-ish via wider line + priceLine accent.
@@ -56,7 +59,7 @@ if (cfg) {
     priceChart.timeScale().fitContent();
     invChart.timeScale().fitContent();
 
-    // Legend checkbox toggles.
+    // Legend checkbox toggles: show/hide the matching series (Net Bandar or per-broker).
     document.querySelectorAll('[data-inv-toggle]').forEach((cb) => {
         cb.addEventListener('change', () => {
             const code = cb.getAttribute('data-inv-toggle');

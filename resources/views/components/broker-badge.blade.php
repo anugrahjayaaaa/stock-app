@@ -1,3 +1,5 @@
+{{-- Shared broker badge: ownership color resolved from the brokers table (Broker::categoryClass). --}}
+{{-- Props: code (string, required), class (string, extra classes). --}}
 @props(['code', 'class' => ''])
 @php
     // ponytail: ownership color comes from brokers table (Broker::categoryClass).

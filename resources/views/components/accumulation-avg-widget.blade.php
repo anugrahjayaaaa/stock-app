@@ -1,3 +1,6 @@
+{{-- Accumulation Range & Bandar AVG: duration badge, date range, AVG zone card, --}}
+{{-- top-3 accumulator brokers, and a price-distance bar (SL / AVG / NOW / TARGET). --}}
+{{-- Props: data (array from StockAnalysisController::mockAccumulation). --}}
 @php
     // ponytail: single source for accumulation render. `data` comes from StockAnalysisController::mockAccumulation.
     $d = $data;

@@ -1,3 +1,5 @@
+{{-- Broker Impostor Detector: buyer/seller leaderboard + retail behavioral "Impostor Radar". --}}
+{{-- Props: buyers[], sellers[] (leaderboard rows), retail[] (behavioral rows). --}}
 @php
     // ponytail: single source for badge styling + impostor threshold. Swap with Invezgo payload later.
     $impostorThreshold = 65;

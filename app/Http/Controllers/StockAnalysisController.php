@@ -10,10 +10,19 @@ use Illuminate\View\View;
 
 class StockAnalysisController extends Controller
 {
-    public function __construct(private TradingDayService $tradingDay)
-    {
-    }
+    /**
+     * Inject the trading-day service used to resolve the default analysis date.
+     */
+    public function __construct(private TradingDayService $tradingDay) {}
 
+    /**
+     * Render the stock analysis page.
+     *
+     * Gathers the broker master from DB and builds all widget datasets
+     * (impostor leaderboard, accumulation range, inventory series) plus the
+     * lightweight UI-mock rows for broker-summary / done-detail / PVA.
+     * Swap the mock builders for Invezgo payloads once the API is wired.
+     */
     public function index(): View
     {
         $stocks = Stock::orderBy('code')->get(['code', 'name']);
@@ -56,8 +65,18 @@ class StockAnalysisController extends Controller
         ));
     }
 
-    // ponytail: inventory series for the chart. Deterministic per-broker cumulative net over a date range.
-    // Swap with Invezgo /analysis/transactions/broker per day when API is wired.
+    /**
+     * Build the broker-inventory chart dataset.
+     *
+     * Generates 30 daily points of deterministic cumulative net per broker
+     * (AK/BK/CC/PD accumulate, YP/ZP/YU distribute), a synthetic price line,
+     * the Top-3 accumulators/distributors, Net Bandar total, and an AI
+     * bandarmology phase/score/summary. Replace with Invezgo per-day
+     * transactions once the API is wired.
+     *
+     * @param  Collection  $brokers  Broker master (code/name/category) from DB.
+     * @return array{dates:string[],price:array,series:array,topAccum:array,topDist:array,netBandar:int,score:int,phase:string,summary:string}
+     */
     private function mockInventory(Collection $brokers): array
     {
         $codes = ['AK', 'BK', 'CC', 'PD', 'YP', 'ZP', 'YU'];
@@ -68,7 +87,8 @@ class StockAnalysisController extends Controller
         }
 
         $series = [];
-        $accum = []; $dist = [];
+        $accum = [];
+        $dist = [];
         foreach ($codes as $code) {
             if (! $brokers->contains('code', $code)) {
                 continue;
@@ -88,8 +108,11 @@ class StockAnalysisController extends Controller
                 'side' => $sign > 0 ? 'buy' : 'sell',
                 'data' => $points,
             ];
-            if ($sign > 0) $accum[] = ['code' => $code, 'name' => $series[count($series)-1]['name'], 'end' => $cum];
-            else $dist[] = ['code' => $code, 'name' => $series[count($series)-1]['name'], 'end' => $cum];
+            if ($sign > 0) {
+                $accum[] = ['code' => $code, 'name' => $series[count($series) - 1]['name'], 'end' => $cum];
+            } else {
+                $dist[] = ['code' => $code, 'name' => $series[count($series) - 1]['name'], 'end' => $cum];
+            }
         }
 
         $price = collect($dates)->map(function ($date, $j) {
@@ -118,13 +141,24 @@ class StockAnalysisController extends Controller
         ];
     }
 
-    // ponytail: accumulation view data. Top buyers from DB brokers; AVG/value derived deterministically.
-    // Swap with Invezgo /analysis/summary/broker/{code} accumulated net per period when API is wired.
+    /**
+     * Build the accumulation-range & bandar AVG widget dataset.
+     *
+     * Derives per-broker net lot / average price / value from the DB broker
+     * master deterministically, ranks the Top-3 accumulators, and computes
+     * the Bandar AVG plus current/SL/target levels. Replace with Invezgo
+     * accumulated-net-per-period once the API is wired.
+     *
+     * @param  Collection  $brokers  Broker master (code/name/category) from DB.
+     * @param  string  $tradeDay  Default analysis date (used as range end).
+     * @return array{start:string,end:string,tradingDays:int,top3:array,totalNetLot:int,totalNetValue:int,bandarAvg:int,currentPrice:int,sl:int,target:int}
+     */
     private function mockAccumulation(Collection $brokers, string $tradeDay): array
     {
         $codes = ['AK', 'YP', 'CC', 'BK', 'PD', 'NI'];
         $rows = [];
-        $totalLot = 0; $totalVal = 0;
+        $totalLot = 0;
+        $totalVal = 0;
         foreach ($codes as $code) {
             if (! $brokers->contains('code', $code)) {
                 continue;
@@ -133,7 +167,8 @@ class StockAnalysisController extends Controller
             $netLot = (int) ($r * 800000) + 50000;
             $avgPrice = (int) (($r * 200) + 9800);
             $netValue = $netLot * $avgPrice;
-            $totalLot += $netLot; $totalVal += $netValue;
+            $totalLot += $netLot;
+            $totalVal += $netValue;
             $rows[] = [
                 'code' => $code,
                 'name' => optional($brokers->firstWhere('code', $code))->name ?? $code,
@@ -160,13 +195,25 @@ class StockAnalysisController extends Controller
         ];
     }
 
-    // Deterministic pseudo-random so reloads are stable (no faker needed).
+    /**
+     * Deterministic pseudo-random in [0.001, 1.0] from a broker code.
+     *
+     * Keeps mock data stable across reloads without a faker dependency.
+     */
     private function seed(string $code): float
     {
         $h = crc32($code);
+
         return (($h % 1000) + 1) / 1000; // 0.001 - 1.0
     }
 
+    /**
+     * Build the buyer/seller leaderboard rows from the DB broker master.
+     *
+     * @param  Collection  $brokers  Broker master from DB.
+     * @param  string  $side  'buy' or 'sell' (flips the net sign).
+     * @return array<int,array{code:string,inv:string,net:float,pct:int}>
+     */
     private function mockLeaders(Collection $brokers, string $side): array
     {
         $codes = ['YP', 'AK', 'PD', 'BK', 'KZ', 'AZ', 'XL', 'NI', 'CS', 'RX'];
@@ -189,22 +236,40 @@ class StockAnalysisController extends Controller
         return $rows;
     }
 
+    /**
+     * Flag buyers acting as retail impostors (YP with >=70% HAKA).
+     *
+     * @return array<int,array{code:string,inv:string,net:float,pct:int,impostor:bool}>
+     */
     private function classifyBuyers(array $rows, Collection $byCode): array
     {
-        return collect($rows)->map(function ($r) use ($byCode) {
+        return collect($rows)->map(function ($r) {
             $impostor = $r['code'] === 'YP' && $r['pct'] >= 70;
+
             return [...$r, 'impostor' => $impostor];
         })->all();
     }
 
+    /**
+     * Sellers are never flagged as impostors in the current mock.
+     *
+     * @return array<int,array{code:string,inv:string,net:float,pct:int,impostor:bool}>
+     */
     private function classifySellers(array $rows, Collection $byCode): array
     {
         return collect($rows)->map(fn ($r) => [...$r, 'impostor' => false])->all();
     }
 
+    /**
+     * Build the retail-broker behavioral dataset (HAKA/HAKI, avg lot, score).
+     *
+     * @param  Collection  $brokers  Broker master from DB.
+     * @return array<int,array{code:string,name:string,tx:int,vol:int,avgLot:int,haka:int,haki:int,score:int,diagnosis:string}>
+     */
     private function mockRetail(Collection $brokers): array
     {
         $codes = ['YP', 'CC', 'PD', 'XC', 'NI'];
+
         return collect($codes)->map(function ($code) use ($brokers) {
             $r = $this->seed($code.'retail');
             $avgLot = (int) ($r * 6000) + 50;

@@ -7,9 +7,14 @@ use Illuminate\Database\Seeder;
 
 class BrokerSeeder extends Seeder
 {
-    // Broker master from public IDX data (refs: idx.co.id ringkasan-broker, cermati daftar kode broker).
-    // category: asing = foreign-owned, bumn = state-owned, swasta = local private.
-    // ponytail: covers brokers used across widgets + common top brokers; extend lazily as new codes appear.
+    /**
+     * Broker master from public IDX data (refs: idx.co.id ringkasan-broker, cermati daftar kode broker).
+     *
+     * category: asing = foreign-owned, bumn = state-owned, swasta = local private.
+     * ponytail: covers brokers used across widgets + common top brokers; extend lazily as new codes appear.
+     *
+     * @var array<int,array{0:string,1:string,2:string}> [code, name, category]
+     */
     private const BROKERS = [
         // BUMN
         ['CC', 'Mandiri Sekuritas', 'bumn'],
@@ -56,6 +61,9 @@ class BrokerSeeder extends Seeder
         ['KK', 'Phillip Sekuritas Indonesia', 'swasta'],
     ];
 
+    /**
+     * Seed the brokers table from the BROKERS master list (idempotent).
+     */
     public function run(): void
     {
         foreach (self::BROKERS as [$code, $name, $category]) {

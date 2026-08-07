@@ -1,3 +1,5 @@
+{{-- Broker Summary: header stats, filter bar, HAKA/HAKI net bar, merged buyer/seller scroll table. --}}
+{{-- Props: ticker, avg, vol, val, accum, buyPct, sellPct, buyers[], sellers[], tradeDay. --}}
 <div class="card card-outline card-secondary h-100">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0"><i class="fas fa-building me-1 text-secondary"></i> Broker Summary
