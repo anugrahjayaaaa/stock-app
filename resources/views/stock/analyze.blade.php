@@ -2,7 +2,7 @@
 @section('header', __('Stock Analysis'))
 
 @section('content')
-    <div class="card card-primary card-outline">
+    <div class="card card-primary card-outline" id="analysis-page">
         <div class="card-header d-flex flex-column gap-2">
             <h3 class="card-title mb-0">Stock Analysis</h3>
             <div class="d-flex gap-1 align-items-center">
@@ -241,6 +241,7 @@
                                 <span class="fw-bold">BBCA</span>
                                 &nbsp;10,225
                                 &nbsp;<span class="text-danger">-25 / -0.2%</span>
+                                &nbsp;Vol <span class="fw-bold">52,800</span>
                             </div>
                             <div class="w-100">
                                 <div class="progress" style="height:6px;border-radius:0;overflow:hidden;">
@@ -250,128 +251,58 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            {{-- Controls --}}
+                            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                <button type="button" id="groupToggle"
+                                    class="btn btn-sm btn-outline-secondary">Group by Order ID</button>
+                                <div class="ms-auto d-flex gap-2 align-items-center">
+                                    <input type="date" class="form-control form-control-sm" style="width:140px;">
+                                    <select class="form-select form-select-sm" style="width:90px;">
+                                        <option>RG</option><option>TN</option><option>NG</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" style="width:80px;">
+                                        <option>All</option><option>F</option><option>D</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="row g-2">
                                 {{-- BUY SIDE (HAKA) --}}
                                 <div class="col-md-6">
                                     <div class="text-success fw-bold mb-1" style="font-size:11px;">HAKA / BUY DRIVEN</div>
                                     <div style="max-height:240px;overflow:auto;">
-                                    <table class="table table-sm table-hover mb-0"
+                                    <table class="table table-sm table-hover mb-0 align-middle"
                                         style="font-size:11px;font-family:monospace;">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Time</th>
-                                                <th>Buyer(B)</th>
-                                                <th>Seller(S)</th>
-                                                <th>Price</th>
-                                                <th>Vol</th>
-                                                <th>Type</th>
-                                            </tr>
+                                        <thead class="table-light sticky-top">
+                                            <tr><th>Time</th><th>B</th><th>S</th><th>Mkt</th><th>Inv</th><th class="text-end">Price</th><th class="text-end">Vol</th><th>Type</th></tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>09:01:12</td>
-                                                <td><span class="badge bg-secondary">YP</span></td>
-                                                <td><span class="badge bg-light text-dark">CC</span></td>
-                                                <td class="text-success">10,230</td>
-                                                <td>1,200</td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:03:45</td>
-                                                <td><span class="badge bg-secondary">AZ</span></td>
-                                                <td><span class="badge bg-light text-dark">PD</span></td>
-                                                <td class="text-success">10,235</td>
-                                                <td>850</td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:07:30</td>
-                                                <td><span class="badge bg-secondary">CC</span></td>
-                                                <td><span class="badge bg-light text-dark">NH</span></td>
-                                                <td class="text-success">10,228</td>
-                                                <td>2,400</td>
-                                                <td><span class="text-primary">F</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:12:08</td>
-                                                <td><span class="badge bg-secondary">PD</span></td>
-                                                <td><span class="badge bg-light text-dark">YP</span></td>
-                                                <td class="text-success">10,240</td>
-                                                <td>600</td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:18:55</td>
-                                                <td><span class="badge bg-secondary">AZ</span></td>
-                                                <td><span class="badge bg-light text-dark">CC</span></td>
-                                                <td class="text-success">10,225</td>
-                                                <td>1,750</td>
-                                                <td><span class="text-primary">F</span></td>
-                                            </tr>
+                                            <tr class="bg-success-subtle" data-grouped="1"><td>09:15:22</td><td><span class="badge bg-secondary">YP</span></td><td><span class="badge bg-light text-dark">CC</span></td><td>RG</td><td>D</td><td class="text-end text-success fw-bold">9,800</td><td class="text-end">50,000</td><td><span class="text-success fw-bold">BUY</span></td></tr>
+                                            <tr><td>09:16:05</td><td><span class="badge bg-secondary">PD</span></td><td><span class="badge bg-light text-dark">AZ</span></td><td>RG</td><td>F</td><td class="text-end text-success fw-bold">9,805</td><td class="text-end">1,250</td><td><span class="text-success fw-bold">BUY</span></td></tr>
+                                            <tr><td>09:17:40</td><td><span class="badge bg-secondary">CC</span></td><td><span class="badge bg-light text-dark">NH</span></td><td>RG</td><td>D</td><td class="text-end text-success fw-bold">9,810</td><td class="text-end">2,400</td><td><span class="text-success fw-bold">BUY</span></td></tr>
+                                            <tr><td>09:19:12</td><td><span class="badge bg-secondary">AZ</span></td><td><span class="badge bg-light text-dark">PD</span></td><td>TN</td><td>F</td><td class="text-end text-success fw-bold">9,815</td><td class="text-end">600</td><td><span class="text-success fw-bold">BUY</span></td></tr>
+                                            <tr><td>09:21:55</td><td><span class="badge bg-secondary">YP</span></td><td><span class="badge bg-light text-dark">CC</span></td><td>RG</td><td>D</td><td class="text-end text-success fw-bold">9,800</td><td class="text-end">1,750</td><td><span class="text-success fw-bold">BUY</span></td></tr>
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
                                 </div>
                                 {{-- SELL SIDE (HAKI) --}}
                                 <div class="col-md-6">
                                     <div class="text-danger fw-bold mb-1" style="font-size:11px;">HAKI / SELL DRIVEN</div>
                                     <div style="max-height:240px;overflow:auto;">
-                                    <table class="table table-sm table-hover mb-0"
+                                    <table class="table table-sm table-hover mb-0 align-middle"
                                         style="font-size:11px;font-family:monospace;">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Time</th>
-                                                <th>Price</th>
-                                                <th>Vol</th>
-                                                <th>Buyer(B)</th>
-                                                <th>Seller(S)</th>
-                                                <th>Type</th>
-                                            </tr>
+                                        <thead class="table-light sticky-top">
+                                            <tr><th>Time</th><th class="text-end">Price</th><th class="text-end">Vol</th><th>B</th><th>S</th><th>Mkt</th><th>Inv</th><th>Type</th></tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>09:02:30</td>
-                                                <td class="text-danger">10,220</td>
-                                                <td>900</td>
-                                                <td><span class="badge bg-light text-dark">NH</span></td>
-                                                <td><span class="badge bg-secondary">YP</span></td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:05:14</td>
-                                                <td class="text-danger">10,215</td>
-                                                <td>1,100</td>
-                                                <td><span class="badge bg-light text-dark">PD</span></td>
-                                                <td><span class="badge bg-secondary">AZ</span></td>
-                                                <td><span class="text-primary">F</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:09:47</td>
-                                                <td class="text-danger">10,210</td>
-                                                <td>500</td>
-                                                <td><span class="badge bg-light text-dark">CC</span></td>
-                                                <td><span class="badge bg-secondary">PD</span></td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:14:02</td>
-                                                <td class="text-danger">10,205</td>
-                                                <td>2,050</td>
-                                                <td><span class="badge bg-light text-dark">AZ</span></td>
-                                                <td><span class="badge bg-secondary">CC</span></td>
-                                                <td><span class="text-primary">F</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>09:20:39</td>
-                                                <td class="text-danger">10,200</td>
-                                                <td>700</td>
-                                                <td><span class="badge bg-light text-dark">YP</span></td>
-                                                <td><span class="badge bg-secondary">NH</span></td>
-                                                <td><span class="text-info">M</span></td>
-                                            </tr>
+                                            <tr class="bg-danger-subtle" data-grouped="1"><td>09:15:30</td><td class="text-end text-danger fw-bold">9,775</td><td class="text-end">1,250</td><td><span class="badge bg-light text-dark">NI</span></td><td><span class="badge bg-secondary">AZ</span></td><td>RG</td><td>F</td><td><span class="text-danger fw-bold">SELL</span></td></tr>
+                                            <tr><td>09:16:48</td><td class="text-end text-danger fw-bold">9,770</td><td class="text-end">900</td><td><span class="badge bg-light text-dark">NH</span></td><td><span class="badge bg-secondary">YP</span></td><td>RG</td><td>D</td><td><span class="text-danger fw-bold">SELL</span></td></tr>
+                                            <tr><td>09:18:20</td><td class="text-end text-danger fw-bold">9,765</td><td class="text-end">1,100</td><td><span class="badge bg-light text-dark">PD</span></td><td><span class="badge bg-secondary">AZ</span></td><td>NG</td><td>F</td><td><span class="text-danger fw-bold">SELL</span></td></tr>
+                                            <tr><td>09:20:02</td><td class="text-end text-danger fw-bold">9,760</td><td class="text-end">2,050</td><td><span class="badge bg-light text-dark">CC</span></td><td><span class="badge bg-secondary">PD</span></td><td>RG</td><td>D</td><td><span class="text-danger fw-bold">SELL</span></td></tr>
+                                            <tr><td>09:22:39</td><td class="text-end text-danger fw-bold">9,755</td><td class="text-end">700</td><td><span class="badge bg-light text-dark">YP</span></td><td><span class="badge bg-secondary">NH</span></td><td>RG</td><td>F</td><td><span class="text-danger fw-bold">SELL</span></td></tr>
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -427,4 +358,16 @@
             </div>
         </div>
     </div>
+@push('scripts')
+<script>
+    // ponytail: grouped-by-order-id toggle — shows only is_grouped rows when active.
+    document.getElementById('groupToggle').addEventListener('click', function () {
+        const active = this.classList.toggle('btn-success');
+        this.classList.toggle('btn-outline-secondary', !active);
+        document.querySelectorAll('#analysis-page [data-grouped]').forEach(r => {
+            r.style.display = (active && r.dataset.grouped !== '1') ? 'none' : '';
+        });
+    });
+</script>
+@endpush
 @endsection
