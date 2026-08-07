@@ -73,46 +73,42 @@
                 <div class="progress-bar bg-danger" style="width:{{ $sellPct }}%;border-radius:0 999px 999px 0;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);"></div>
             </div>
         </div>
-        <div class="row g-2">
-            <div class="col-md-6">
-                <div class="text-success fw-bold mb-1" style="font-size:11px;">TOP BUYER (ACCUMULATOR)</div>
-                <div style="max-height:240px;overflow:auto;">
-                    <table class="table table-sm table-hover mb-0" style="font-size:11px;font-family:monospace;">
-                        <thead class="table-light">
-                            <tr><th>Broker</th><th class="text-end">Vol</th><th class="text-end">Val(M)</th><th class="text-end">Avg</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($buyers as $b)
-                                <tr>
-                                    <td><x-broker-badge :code="$b['code']" /></td>
-                                    <td class="text-end">{{ $b['vol'] }}</td>
-                                    <td class="text-end">{{ $b['val'] }}</td>
-                                    <td class="text-end">{{ $b['avg'] }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+        <div>
+            <div class="d-flex justify-content-between fw-bold mb-1" style="font-size:11px;">
+                <span class="text-success">TOP BUYER (ACCUMULATOR)</span>
+                <span class="text-danger">TOP SELLER (DISTRIBUTOR)</span>
             </div>
-            <div class="col-md-6">
-                <div class="text-danger fw-bold mb-1" style="font-size:11px;">TOP SELLER (DISTRIBUTOR)</div>
-                <div style="max-height:240px;overflow:auto;">
-                    <table class="table table-sm table-hover mb-0" style="font-size:11px;font-family:monospace;">
-                        <thead class="table-light">
-                            <tr><th>Broker</th><th class="text-end">Vol</th><th class="text-end">Val(M)</th><th class="text-end">Avg</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($sellers as $s)
-                                <tr>
-                                    <td><x-broker-badge :code="$s['code']" /></td>
-                                    <td class="text-end">{{ $s['vol'] }}</td>
-                                    <td class="text-end">{{ $s['val'] }}</td>
-                                    <td class="text-end">{{ $s['avg'] }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+            <div style="max-height:240px;overflow:auto;">
+                <table class="table table-sm table-hover mb-0 align-middle" style="font-size:11px;font-family:monospace;">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th style="width:1%;white-space:nowrap;">Buy Broker</th><th class="text-center">Vol</th><th class="text-center">Val(M)</th><th class="text-center">Avg</th>
+                            <th style="width:1%;white-space:nowrap;">Sell Broker</th><th class="text-center">Vol</th><th class="text-center">Val(M)</th><th class="text-center">Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for ($i = 0; $i < max(count($buyers), count($sellers)); $i++)
+                            <tr>
+                                @if (isset($buyers[$i]))
+                                    <td class="text-center" style="width:1%;white-space:nowrap;"><x-broker-badge :code="$buyers[$i]['code']" /></td>
+                                    <td class="text-center">{{ $buyers[$i]['vol'] }}</td>
+                                    <td class="text-center">{{ $buyers[$i]['val'] }}</td>
+                                    <td class="text-center">{{ $buyers[$i]['avg'] }}</td>
+                                @else
+                                    <td colspan="4"></td>
+                                @endif
+                                @if (isset($sellers[$i]))
+                                    <td class="text-center" style="width:1%;white-space:nowrap;"><x-broker-badge :code="$sellers[$i]['code']" /></td>
+                                    <td class="text-center">{{ $sellers[$i]['vol'] }}</td>
+                                    <td class="text-center">{{ $sellers[$i]['val'] }}</td>
+                                    <td class="text-center">{{ $sellers[$i]['avg'] }}</td>
+                                @else
+                                    <td colspan="4"></td>
+                                @endif
+                            </tr>
+                        @endfor
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
