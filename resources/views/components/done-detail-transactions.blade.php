@@ -1,12 +1,3 @@
-@php
-    $brokerClass = function ($code) {
-        $asing = ['AK','BK','KZ','RX','CS','ZP'];
-        $insti = ['CC','PZ','NI'];
-        if (in_array($code, $asing, true)) return 'bg-danger';
-        if (in_array($code, $insti, true)) return 'bg-success';
-        return 'bg-purple';
-    };
-@endphp
 <div class="card card-outline card-secondary h-100 d-flex flex-column">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0">Done Detail Transactions</h5>
@@ -46,8 +37,8 @@
                         <tr class="{{ $r['grouped'] ? 'bg-success-subtle' : '' }}" data-grouped="{{ $r['grouped'] ? '1' : '0' }}">
                             <td>{{ $r['time'] }}</td>
                             <td><span class="{{ $r['action'] === 'BUY' ? 'text-success' : 'text-danger' }} fw-bold">{{ $r['action'] }}</span></td>
-                            <td><span class="badge {{ $brokerClass($r['buyer']) }}">{{ $r['buyer'] }}</span></td>
-                            <td><span class="badge {{ $brokerClass($r['seller']) }}">{{ $r['seller'] }}</span></td>
+                            <td><x-broker-badge :code="$r['buyer']" /></td>
+                            <td><x-broker-badge :code="$r['seller']" /></td>
                             <td>{{ $r['market'] }}</td>
                             <td>{{ $r['inv'] }}</td>
                             <td class="text-end {{ $r['action'] === 'BUY' ? 'text-success' : 'text-danger' }} fw-bold">{{ $r['price'] }}</td>

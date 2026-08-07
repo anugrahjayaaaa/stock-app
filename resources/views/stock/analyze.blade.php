@@ -3,21 +3,8 @@
 
 @section('content')
     @php
-        // ponytail: mock data — swap with Invezgo payload later.
-        $buyers = [
-            ['code' => 'YP', 'vol' => '5,200', 'val' => '53.2', 'avg' => '10,227'],
-            ['code' => 'AK', 'vol' => '4,100', 'val' => '41.9', 'avg' => '10,229'],
-            ['code' => 'PD', 'vol' => '3,300', 'val' => '33.7', 'avg' => '10,224'],
-            ['code' => 'BK', 'vol' => '3,000', 'val' => '30.7', 'avg' => '10,220'],
-            ['code' => 'KZ', 'vol' => '2,900', 'val' => '29.7', 'avg' => '10,228'],
-        ];
-        $sellers = [
-            ['code' => 'AZ', 'vol' => '4,800', 'val' => '49.1', 'avg' => '10,225'],
-            ['code' => 'XL', 'vol' => '3,900', 'val' => '39.9', 'avg' => '10,223'],
-            ['code' => 'NI', 'vol' => '3,200', 'val' => '32.7', 'avg' => '10,219'],
-            ['code' => 'CS', 'vol' => '2,800', 'val' => '28.6', 'avg' => '10,214'],
-            ['code' => 'RX', 'vol' => '2,400', 'val' => '24.5', 'avg' => '10,225'],
-        ];
+        // ponytail: broker-summary / done-detail / PVA keep static UI mock; impostor + leaderboard
+        // data now comes from StockAnalysisController (built from brokers table). Swap with Invezgo later.
         $doneRows = [
             ['time' => '09:15:22', 'action' => 'BUY',  'buyer' => 'YP', 'seller' => 'CC', 'market' => 'RG', 'inv' => 'D', 'price' => '9,800', 'vol' => '50,000', 'grouped' => true],
             ['time' => '09:15:30', 'action' => 'SELL', 'buyer' => 'NI', 'seller' => 'AZ', 'market' => 'RG', 'inv' => 'F', 'price' => '9,775', 'vol' => '1,250', 'grouped' => false],
@@ -36,11 +23,6 @@
             ['date' => '2026-08-05', 'change' => -0.6, 'volRatio' => 0.7, 'status' => 'Retest',       'tag' => 'Healthy pullback'],
             ['date' => '2026-08-06', 'change' => -2.1, 'volRatio' => 2.3, 'status' => 'Distribution', 'tag' => 'Heavy selling'],
             ['date' => '2026-08-07', 'change' => 1.2,  'volRatio' => 1.5, 'status' => 'Accumulation', 'tag' => 'Bid support'],
-        ];
-        $techPatterns = [
-            ['name' => 'Double Bottom', 'type' => 'Reversal', 'tp' => '10,650', 'sl' => '9,900', 'status' => 'Confirmed'],
-            ['name' => 'Bullish Flag', 'type' => 'Continuation', 'tp' => '10,800', 'sl' => '10,050', 'status' => 'Forming'],
-            ['name' => 'Triangle', 'type' => 'Continuation', 'tp' => '10,500', 'sl' => '9,950', 'status' => 'Forming'],
         ];
     @endphp
     <div class="card card-primary card-outline" id="analysis-page">
@@ -100,14 +82,9 @@
                         :patterns="$techPatterns"
                         :level-pos="['s2' => 5, 's1' => 25, 'price' => 60, 'r1' => 75, 'r2' => 95]" />
                 </div>
-                {{-- Smart-money classification --}}
+                {{-- Smart-money classification / impostor --}}
                 <div class="col-lg-6 d-flex">
-                    <div class="card card-outline card-secondary h-100">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Buyer/Seller Classification</h5>
-                        </div>
-                        <div class="card-body text-muted">Placeholder — bandar / emiten / smart money / ritel tags.</div>
-                    </div>
+                    <x-broker-impostor-widget :buyers="$buyersCls" :sellers="$sellersCls" :retail="$retail" />
                 </div>
                 {{-- Accumulation range + AVG lines --}}
                 <div class="col-lg-6 d-flex">

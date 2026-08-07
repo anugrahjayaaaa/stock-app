@@ -1,13 +1,3 @@
-@php
-    // broker color rule: asing=red, insti=green, ritel=purple
-    $brokerClass = function ($code) {
-        $asing = ['AK','BK','KZ','RX','CS','ZP'];
-        $insti = ['CC','PZ','NI'];
-        if (in_array($code, $asing, true)) return 'bg-danger';
-        if (in_array($code, $insti, true)) return 'bg-success';
-        return 'bg-purple';
-    };
-@endphp
 <div class="card card-outline card-secondary h-100">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0"><i class="fas fa-building me-1 text-secondary"></i> Broker Summary
@@ -94,7 +84,7 @@
                         <tbody>
                             @foreach ($buyers as $b)
                                 <tr>
-                                    <td><span class="badge {{ $brokerClass($b['code']) }}">{{ $b['code'] }}</span></td>
+                                    <td><x-broker-badge :code="$b['code']" /></td>
                                     <td class="text-end">{{ $b['vol'] }}</td>
                                     <td class="text-end">{{ $b['val'] }}</td>
                                     <td class="text-end">{{ $b['avg'] }}</td>
@@ -114,7 +104,7 @@
                         <tbody>
                             @foreach ($sellers as $s)
                                 <tr>
-                                    <td><span class="badge {{ $brokerClass($s['code']) }}">{{ $s['code'] }}</span></td>
+                                    <td><x-broker-badge :code="$s['code']" /></td>
                                     <td class="text-end">{{ $s['vol'] }}</td>
                                     <td class="text-end">{{ $s['val'] }}</td>
                                     <td class="text-end">{{ $s['avg'] }}</td>
