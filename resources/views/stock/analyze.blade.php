@@ -88,13 +88,7 @@
                 </div>
                 {{-- Accumulation range + AVG lines --}}
                 <div class="col-lg-6 d-flex">
-                    <div class="card card-outline card-secondary h-100">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Accumulation Range & AVG Lines</h5>
-                        </div>
-                        <div class="card-body text-muted">Placeholder — AVG SM/bandar/emiten as support, AVG ritel as
-                            resistance.</div>
-                    </div>
+                    <x-accumulation-avg-widget :data="$accumulation" />
                 </div>
                 {{-- AI analysis result --}}
                 <div class="col-12">

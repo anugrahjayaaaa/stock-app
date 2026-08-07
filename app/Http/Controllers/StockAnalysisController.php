@@ -31,6 +31,8 @@ class StockAnalysisController extends Controller
         $buyersCls = $this->classifyBuyers($buyers, $byCode);
         $sellersCls = $this->classifySellers($sellers, $byCode);
 
+        $accumulation = $this->mockAccumulation($brokers, $tradeDay);
+
         // broker-summary wants lighter rows (vol/val/avg as strings — UI mock shape).
         $buyers = collect($buyers)->map(fn ($b) => [
             'code' => $b['code'], 'vol' => number_format(($this->seed($b['code']) * 4000) + 1000),
@@ -49,8 +51,50 @@ class StockAnalysisController extends Controller
         ];
 
         return view('stock.analyze', compact(
-            'stocks', 'tradeDay', 'buyers', 'sellers', 'buyersCls', 'sellersCls', 'retail', 'techPatterns'
+            'stocks', 'tradeDay', 'buyers', 'sellers', 'buyersCls', 'sellersCls', 'retail', 'techPatterns', 'accumulation'
         ));
+    }
+
+    // ponytail: accumulation view data. Top buyers from DB brokers; AVG/value derived deterministically.
+    // Swap with Invezgo /analysis/summary/broker/{code} accumulated net per period when API is wired.
+    private function mockAccumulation(Collection $brokers, string $tradeDay): array
+    {
+        $codes = ['AK', 'YP', 'CC', 'BK', 'PD', 'NI'];
+        $rows = [];
+        $totalLot = 0; $totalVal = 0;
+        foreach ($codes as $code) {
+            if (! $brokers->contains('code', $code)) {
+                continue;
+            }
+            $r = $this->seed($code.'acc');
+            $netLot = (int) ($r * 800000) + 50000;
+            $avgPrice = (int) (($r * 200) + 9800);
+            $netValue = $netLot * $avgPrice;
+            $totalLot += $netLot; $totalVal += $netValue;
+            $rows[] = [
+                'code' => $code,
+                'name' => optional($brokers->firstWhere('code', $code))->name ?? $code,
+                'netLot' => $netLot, 'avgPrice' => $avgPrice, 'netValue' => $netValue,
+            ];
+        }
+        $rows = collect($rows)->sortByDesc('netLot')->values();
+        $top3 = $rows->take(3)->map(fn ($b) => [...$b, 'concentration' => round($b['netLot'] / max($totalLot, 1) * 100)])->all();
+
+        $bandarAvg = (int) $rows->avg('avgPrice');
+        $current = (int) ($bandarAvg * 1.04); // +4% -> Safe Entry Zone
+
+        return [
+            'start' => '2026-07-15',
+            'end' => $tradeDay,
+            'tradingDays' => 18,
+            'top3' => $top3,
+            'totalNetLot' => $totalLot,
+            'totalNetValue' => $totalVal,
+            'bandarAvg' => $bandarAvg,
+            'currentPrice' => $current,
+            'sl' => (int) ($bandarAvg * 0.94),
+            'target' => (int) ($bandarAvg * 1.15),
+        ];
     }
 
     // Deterministic pseudo-random so reloads are stable (no faker needed).
