@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\BrokerController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\StockAnalysisController;
+use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,12 +35,17 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::middleware('auth')->group(function () {
-    Route::get('/stock/chart/litechart', [App\Http\Controllers\StockController::class, 'showChart'])->name('stock.chart.litechart');
-    Route::get('/stock/chart/tv', [App\Http\Controllers\StockController::class, 'showChartTv'])->name('stock.chart.tv');
-    Route::get('/stock/drawings', [App\Http\Controllers\StockController::class, 'getDrawings'])->name('stock.drawings');
-    Route::post('/stock/drawings', [App\Http\Controllers\StockController::class, 'saveDrawings'])->name('stock.drawings.save');
-    Route::get('/stock/ohlc', [App\Http\Controllers\StockController::class, 'getOhlc'])->name('stock.ohlc');
-    Route::get('/stock/analyze', [App\Http\Controllers\StockAnalysisController::class, 'index'])->name('stock.analyze');
-    Route::get('/stock/brokers', [App\Http\Controllers\BrokerController::class, 'index'])->name('stock.brokers');
+// Stock features gated by permission (sidebar uses @can with the same keys).
+Route::middleware(['auth', 'permission:view stock charts'])->group(function () {
+    Route::get('/stock/chart/litechart', [StockController::class, 'showChart'])->name('stock.chart.litechart');
+    Route::get('/stock/chart/tv', [StockController::class, 'showChartTv'])->name('stock.chart.tv');
+    Route::get('/stock/drawings', [StockController::class, 'getDrawings'])->name('stock.drawings');
+    Route::post('/stock/drawings', [StockController::class, 'saveDrawings'])->name('stock.drawings.save');
+    Route::get('/stock/ohlc', [StockController::class, 'getOhlc'])->name('stock.ohlc');
+});
+Route::middleware(['auth', 'permission:view stock analysis'])->group(function () {
+    Route::get('/stock/analyze', [StockAnalysisController::class, 'index'])->name('stock.analyze');
+});
+Route::middleware(['auth', 'permission:view brokers'])->group(function () {
+    Route::get('/stock/brokers', [BrokerController::class, 'index'])->name('stock.brokers');
 });

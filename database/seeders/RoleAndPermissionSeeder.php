@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleAndPermissionSeeder extends Seeder
 {
@@ -28,6 +27,11 @@ class RoleAndPermissionSeeder extends Seeder
             // Audit Logs
             ['name' => 'view audit logs', 'guard_name' => 'web'],
             ['name' => 'view audit log details', 'guard_name' => 'web'],
+
+            // Stock features
+            ['name' => 'view stock charts', 'guard_name' => 'web'],
+            ['name' => 'view brokers', 'guard_name' => 'web'],
+            ['name' => 'view stock analysis', 'guard_name' => 'web'],
         ];
 
         $permissionMap = [];
@@ -50,7 +54,7 @@ class RoleAndPermissionSeeder extends Seeder
         foreach ($roles as $roleData) {
             $role = Role::firstOrCreate($roleData);
             $roleMap[$roleData['name']] = $role->id;
-            $role->syncPermissions($permissions);
+            $role->syncPermissions(collect($permissions)->pluck('name')->all());
         }
     }
 }

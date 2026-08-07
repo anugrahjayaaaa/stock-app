@@ -46,6 +46,7 @@
                     </a>
                 </li>
                 @endcan
+                @can('view stock charts')
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link {{ request()->routeIs('stock.chart*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
@@ -68,6 +69,8 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
+                @can('view brokers')
                 <li class="nav-item">
                     <a href="{{ route('stock.brokers') }}"
                        class="nav-link {{ request()->routeIs('stock.brokers') ? 'active' : '' }}">
@@ -75,6 +78,8 @@
                         <p>Broker List</p>
                     </a>
                 </li>
+                @endcan
+                @can('view stock analysis')
                 <li class="nav-item">
                     <a href="{{ route('stock.analyze') }}"
                        class="nav-link {{ request()->routeIs('stock.analyze') ? 'active' : '' }}">
@@ -82,6 +87,7 @@
                         <p>Stock Analysis</p>
                     </a>
                 </li>
+                @endcan
             </ul>
         </nav>
     </div>
