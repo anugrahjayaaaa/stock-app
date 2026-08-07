@@ -38,4 +38,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/stock/drawings', [App\Http\Controllers\StockController::class, 'getDrawings'])->name('stock.drawings');
     Route::post('/stock/drawings', [App\Http\Controllers\StockController::class, 'saveDrawings'])->name('stock.drawings.save');
     Route::get('/stock/ohlc', [App\Http\Controllers\StockController::class, 'getOhlc'])->name('stock.ohlc');
+    Route::get('/stock/analyze', [App\Http\Controllers\StockAnalysisController::class, 'index'])->name('stock.analyze');
 });
