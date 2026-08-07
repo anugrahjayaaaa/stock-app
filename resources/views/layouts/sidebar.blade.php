@@ -46,12 +46,27 @@
                     </a>
                 </li>
                 @endcan
-                <li class="nav-item">
-                    <a href="{{ route('stock.chart') }}"
-                       class="nav-link {{ request()->routeIs('stock.chart') ? 'active' : '' }}">
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link {{ request()->routeIs('stock.chart*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Stock Chart</p>
+                        <p>Stock Chart <i class="fas fa-angle-left end"></i></p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('stock.chart.tv') }}"
+                               class="nav-link {{ request()->routeIs('stock.chart.tv') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tv"></i>
+                                <p>TradingView</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('stock.chart.litechart') }}"
+                               class="nav-link {{ request()->routeIs('stock.chart.litechart') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-chart-area"></i>
+                                <p>Lite Chart</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>

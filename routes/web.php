@@ -31,4 +31,11 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
- Route::get('/stock/chart', [App\Http\Controllers\StockController::class, 'showChart'])->name('stock.chart');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/stock/chart/litechart', [App\Http\Controllers\StockController::class, 'showChart'])->name('stock.chart.litechart');
+    Route::get('/stock/chart/tv', [App\Http\Controllers\StockController::class, 'showChartTv'])->name('stock.chart.tv');
+    Route::get('/stock/drawings', [App\Http\Controllers\StockController::class, 'getDrawings'])->name('stock.drawings');
+    Route::post('/stock/drawings', [App\Http\Controllers\StockController::class, 'saveDrawings'])->name('stock.drawings.save');
+    Route::get('/stock/ohlc', [App\Http\Controllers\StockController::class, 'getOhlc'])->name('stock.ohlc');
+});
