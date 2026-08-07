@@ -43,16 +43,13 @@
                         </div>
                     </div>
                 </div>
-                {{-- Broker summary — COMMENTED: needs Invezgo broker-summary data (GoAPI free tier has no broker-level data). --}}
-                {{--
+                {{-- Broker summary — KEEP: GoAPI /broker_summary supports it. Dev data from controller mock builders. --}}
                 <div class="col-lg-6 d-flex">
                     <x-broker-summary :ticker="'BBCA'" :avg="'10,224'" :vol="'18,500 Lot'" :val="'Rp 189.2M'"
                         :accum="'ACCUMULATION'" :buy-pct="58" :sell-pct="42" :buyers="$buyers" :sellers="$sellers"
                         :trade-day="$tradeDay" />
                 </div>
-                --}}
-                {{-- Done / detail transactions — COMMENTED: needs Invezgo transaction-tape data (GoAPI free tier has no per-trade tape). --}}
-                {{--
+                {{-- Done / detail transactions — COMMENTED: GoAPI has no per-order tape (broker_summary is daily aggregate). Cannot implement.
                 <div class="col-lg-6 d-flex">
                     <x-done-detail-transactions :ticker="'BBCA'" :price="'10,225'" :change="'-25 / -0.2%'"
                         :vol="'52,800'" :rows="$doneRows" />
@@ -76,24 +73,18 @@
                         :patterns="$techPatterns"
                         :level-pos="['s2' => 5, 's1' => 25, 'price' => 60, 'r1' => 75, 'r2' => 95]" />
                 </div>
-                {{-- Smart-money classification / impostor — COMMENTED: needs Invezgo broker-behavior data (GoAPI free tier has no broker-level data). --}}
-                {{--
+                {{-- Smart-money classification / impostor — KEEP: derivable from GoAPI /broker_summary (investor type + net). Dev data from controller. --}}
                 <div class="col-lg-6 d-flex">
                     <x-broker-impostor-widget :buyers="$buyersCls" :sellers="$sellersCls" :retail="$retail" />
                 </div>
-                --}}
-                {{-- Accumulation range + AVG lines — COMMENTED: needs Invezgo accumulated-net-per-broker data (GoAPI free tier has no broker-level data). --}}
-                {{--
+                {{-- Accumulation range + AVG lines — KEEP: derivable from GoAPI /broker_summary over a date range. Dev data from controller. --}}
                 <div class="col-lg-6 d-flex">
                     <x-accumulation-avg-widget :data="$accumulation" />
                 </div>
-                --}}
-                {{-- Broker inventory chart + AI summary — COMMENTED: needs Invezgo per-broker inventory data (GoAPI free tier has no broker-level data). --}}
-                {{--
+                {{-- Broker inventory chart + AI summary — KEEP: cumulative from GoAPI /broker_summary multi-day. Dev data from controller (60-day). --}}
                 <div class="col-12">
                     <x-broker-inventory-chart :inventory="$inventory" />
                 </div>
-                --}}
             </div>
         </div>
     </div>
