@@ -16,7 +16,52 @@
  *
  * Deterministic per (code+date): same inputs -> identical tape (generate-once
  * persistence in the app stays stable across reloads).
+ *
+ * Usage:
+ *   php mock.php                      # start mock server on :8787 (background: add &)
+ *   php mock.php 9000                # custom port
+ *   php mock.php help                # print this help
+ *   php mock.php --selftest          # run logic self-checks (no server)
+ *
+ * When served, hit:
+ *   http://localhost:8787/running-trade?code=BIPI&date=2026-08-10[&open=&high=&low=&close=]
  */
+
+// ---- cli entrypoints --------------------------------------------------------
+if (PHP_SAPI === 'cli') {
+    $arg = $argv[1] ?? '8787';
+    if ($arg === 'help' || $arg === '-h' || $arg === '--help') {
+        $head = explode("\n", file_get_contents(__FILE__), 40);
+        $in = false;
+        foreach ($head as $line) {
+            if (str_starts_with($line, ' * Usage:')) {
+                $in = true;
+            }
+            if ($in) {
+                if (str_starts_with($line, ' */')) {
+                    break;
+                }
+                echo ltrim($line, ' *')."\n";
+            }
+        }
+        exit;
+    }
+    if ($arg === '--selftest') {
+        // handled at the bottom of the file; fall through.
+    } elseif (is_numeric($arg)) {
+        $port = (int) $arg;
+        echo "Mock server running at http://localhost:{$port}/running-trade\n";
+        echo "Hit: ?code=BIPI&date=2026-08-10[&open=&high=&low=&close=]\n";
+        echo "Press Ctrl+C to stop.\n";
+        // Delegate to PHP's built-in server with this file as router.
+        $docroot = dirname(__FILE__);
+        pcntl_exec(PHP_BINARY, ['-S', "localhost:{$port}", '-t', $docroot, __FILE__]);
+        exit;
+    } else {
+        fwrite(STDERR, "Unknown command: {$arg}\nRun: php mock.php help\n");
+        exit(1);
+    }
+}
 
 // ---- zero-dependency router -------------------------------------------------
 $routes = [];
