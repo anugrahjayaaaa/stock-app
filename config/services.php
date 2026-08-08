@@ -39,4 +39,10 @@ return [
         'key' => env('API_CO_ID_KEY'),
     ],
 
+    // Invezgo-compatible running-trade source. Point at the standalone mock
+    // server in dev; swap to https://api.invezgo.com in prod.
+    'invezgo' => [
+        'base_url' => env('INVEZGO_BASE_URL', 'http://localhost:8787'),
+    ],
+
 ];

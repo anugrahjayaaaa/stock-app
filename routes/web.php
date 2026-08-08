@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StockAnalysisController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\RunningTradeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -45,6 +46,8 @@ Route::middleware(['auth', 'permission:view stock charts'])->group(function () {
 });
 Route::middleware(['auth', 'permission:view stock analysis'])->group(function () {
     Route::get('/stock/analyze', [StockAnalysisController::class, 'index'])->name('stock.analyze');
+    Route::get('/stock/running-trade/{code}', [RunningTradeController::class, 'tape'])->name('stock.running-trade');
+    Route::get('/stock/broker-summary/{code}', [RunningTradeController::class, 'brokerSummary'])->name('stock.broker-summary');
 });
 Route::middleware(['auth', 'permission:view brokers'])->group(function () {
     Route::get('/stock/brokers', [BrokerController::class, 'index'])->name('stock.brokers');
