@@ -29,9 +29,10 @@
                 <option value="INVESTOR_TYPE_DOMESTIC" @selected($investor === 'INVESTOR_TYPE_DOMESTIC')>Domestic</option>
             </select>
             <select id="bs-board" class="form-select form-select-sm" style="max-width:120px;">
+                <option value="MARKET_BOARD_ALL" @selected($board === 'MARKET_BOARD_ALL')>All</option>
                 <option value="MARKET_BOARD_REGULER" @selected($board === 'MARKET_BOARD_REGULER')>Regular</option>
                 <option value="MARKET_BOARD_TUNAI" @selected($board === 'MARKET_BOARD_TUNAI')>Tunai</option>
-                <option value="MARKET_BOARD_ALL" @selected($board === 'MARKET_BOARD_ALL')>All</option>
+                <option value="MARKET_BOARD_NEGO" @selected($board === 'MARKET_BOARD_NEGO')>Nego</option>
             </select>
             <select id="bs-txtype" class="form-select form-select-sm" style="max-width:100px;">
                 <option value="TRANSACTION_TYPE_NET" @selected($txType === 'TRANSACTION_TYPE_NET')>Net</option>
