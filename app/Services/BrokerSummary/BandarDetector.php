@@ -52,6 +52,11 @@ class BandarDetector
         $totalBuyer = count(array_filter($rows, fn ($x) => $x['lot'] > 0));
         $totalSeller = count(array_filter($rows, fn ($x) => $x['lot'] < 0));
 
+        // Stockbit bandar volume/value = total BUY side (NET sell fields are negative offsets).
+        // ponytail: matches Stockbit NET probe (vol = sum blot buy, val = sum bval buy).
+        $buyLot = array_sum(array_column($buyers, 'lot'));
+        $buyVal = array_sum(array_column($buyers, 'val'));
+
         // rank net buyers first for Top1/3/5/10 tiers
         $ranked = $rows;
         usort($ranked, fn ($a, $b) => $b['lot'] <=> $a['lot']);
@@ -69,12 +74,12 @@ class BandarDetector
         };
 
         return [
-            'average' => $totalLot ? round($totalVal / (abs($totalLot) * 100), 2) : 0, // avg price/share
+            'average' => $buyLot ? round($buyVal / ($buyLot * 100), 2) : 0, // avg price/share
             'broker_accdist' => $totalVal > 0 ? 'Acc' : ($totalVal < 0 ? 'Dist' : '-'),
             'total_buyer' => $totalBuyer,
             'total_seller' => $totalSeller,
-            'value' => $totalVal,
-            'volume' => $totalLot,
+            'value' => $buyVal,
+            'volume' => $buyLot,
             'avg' => $tier($rows),
             'avg5' => $tier(array_slice($ranked, 0, 5)),
             'top1' => $tier(array_slice($ranked, 0, 1)),
@@ -84,16 +89,16 @@ class BandarDetector
         ];
     }
 
-    /** smallest runnable check: net buyer -> Acc, net seller -> Dist. */
+    /** smallest runnable check: volume = buy total, net buyer -> Acc. */
     public static function demo(): void
     {
         $d = new self();
         $b = $d->compute(
             [['code' => 'BDMN', 'lot' => 100, 'val' => 1_000_000, 'avg' => 100]],
-            [['code' => 'BDMN', 'lot' => 40, 'val' => 400_000, 'avg' => 100]], // net +60 -> Acc
+            [['code' => 'BDMN', 'lot' => 40, 'val' => 400_000, 'avg' => 100]], // net +60 Acc, volume = buy 100
         );
         assert($b['broker_accdist'] === 'Acc', 'net buyer should be Acc');
-        assert($b['volume'] === 60, 'net lot');
+        assert($b['volume'] === 100, 'volume = buy total');
 
         $c = $d->compute(
             [['code' => 'CC', 'lot' => 10, 'val' => 100_000, 'avg' => 100]],

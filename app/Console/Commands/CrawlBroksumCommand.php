@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BroksumBandar;
 use App\Models\BroksumRow;
 use App\Models\Stock;
 use App\Services\Stockbit\StockbitClient;
@@ -52,23 +53,47 @@ class CrawlBroksumCommand extends Command
                 }
             }
             // 2) ALL server-side views (stored as market/investor = 'all')
-            $allMarket = ['MARKET_BOARD_ALL' => 'all'];
-            $allInvestor = ['INVESTOR_TYPE_ALL' => 'all'];
-            // market ALL per investor
-            foreach (self::INVESTORS as $iKey => $iParam) {
-                $saved += $this->fetch($client, $parser, $code, $date, 'MARKET_BOARD_ALL', $iParam, 'all', $iKey);
-            }
-            // investor ALL per market
+            // 3) NET bandar_detector per axis (stored raw so Net view matches Stockbit)
             foreach (self::MARKETS as $mKey => $mParam) {
-                $saved += $this->fetch($client, $parser, $code, $date, $mParam, 'INVESTOR_TYPE_ALL', $mKey, 'all');
+                foreach (self::INVESTORS as $iKey => $iParam) {
+                    $saved += $this->fetchNet($client, $code, $date, $mParam, $iParam, $mKey, $iKey);
+                }
             }
-            // fully ALL
-            $saved += $this->fetch($client, $parser, $code, $date, 'MARKET_BOARD_ALL', 'INVESTOR_TYPE_ALL', 'all', 'all');
+            foreach (self::INVESTORS as $iKey => $iParam) {
+                $saved += $this->fetchNet($client, $code, $date, 'MARKET_BOARD_ALL', $iParam, 'all', $iKey);
+            }
+            foreach (self::MARKETS as $mKey => $mParam) {
+                $saved += $this->fetchNet($client, $code, $date, $mParam, 'INVESTOR_TYPE_ALL', $mKey, 'all');
+            }
+            $saved += $this->fetchNet($client, $code, $date, 'MARKET_BOARD_ALL', 'INVESTOR_TYPE_ALL', 'all', 'all');
         }
 
         $this->info("broksum:crawl done — {$saved} rows for {$date}");
 
         return self::SUCCESS;
+    }
+
+    private function fetchNet(StockbitClient $client, string $code, string $date, string $mParam, string $iParam, string $mKey, string $iKey): int
+    {
+        $data = $client->marketDetector($code, $date, $date, 'TRANSACTION_TYPE_NET', $mParam, $iParam);
+
+        if (isset($data['error'])) {
+            $this->warn("{$code}/{$mKey}/{$iKey} NET: HTTP {$data['error']}");
+
+            return 0;
+        }
+
+        $bandar = $data['bandar_detector'] ?? [];
+        if (empty($bandar)) {
+            return 0;
+        }
+
+        BroksumBandar::updateOrCreate(
+            ['stock_code' => $code, 'date' => $date, 'market_type' => $mKey, 'investor_type' => $iKey],
+            ['bandar' => $bandar]
+        );
+
+        return 1;
     }
 
     private function fetch(StockbitClient $client, StockbitParser $parser, string $code, string $date, string $mParam, string $iParam, string $mKey, string $iKey): int
