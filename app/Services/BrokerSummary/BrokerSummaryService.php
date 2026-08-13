@@ -35,8 +35,11 @@ class BrokerSummaryService
             return $this->empty($code, $from, $to, $txType, $board, $investor, 'Tidak ada data di database untuk filter ini.');
         }
 
+        $txStored = $txType === 'TRANSACTION_TYPE_GROSS' ? 'gross' : 'net';
+
         $rows = BroksumRow::where('stock_code', strtoupper($code))
             ->where('date', $date)
+            ->where('tx_type', $txStored)
             ->whereIn('market_type', $markets)
             ->whereIn('investor_type', $investors)
             ->get(['broker_code', 'side', 'lot', 'val', 'avg', 'freq']);
@@ -45,7 +48,7 @@ class BrokerSummaryService
             return $this->gross($rows, $code, $date, $txType, $board, $investor);
         }
 
-        // NET: derive from stored GROSS (no Stockbit call in request path).
+        // NET rows are already net-per-broker (crawled from Stockbit NET source).
         return $this->net($rows, $code, $date, $txType, $board, $investor, $markets, $investors);
     }
 
@@ -55,21 +58,9 @@ class BrokerSummaryService
         $sellers = $this->side($rows, 'sell');
         $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
-        // NET view = net-per-broker: positive -> buyer(col accumulator), negative -> seller(col distributor).
-        $net = $this->netSide($buyers, $sellers);
-        $netBuyers = [];
-        $netSellers = [];
-        foreach ($net as $r) {
-            if ($r['lot'] >= 0) {
-                $netBuyers[] = $r;
-            } else {
-                $netSellers[] = ['code' => $r['code'], 'lot' => -$r['lot'], 'val' => -$r['val'], 'avg' => $r['avg'], 'freq' => $r['freq'], 'cat' => $r['cat'], 'volRaw' => formatShort(-$r['lot']), 'valRaw' => formatShort(-$r['val']), 'avgRaw' => number_format($r['avg'], 2)];
-            }
-        }
-
         return array_merge([
-            'buyers' => $netBuyers,
-            'sellers' => $netSellers,
+            'buyers' => $buyers,
+            'sellers' => $sellers,
             'bandar' => $bandar,
             'total' => [
                 'value' => $bandar['value'],

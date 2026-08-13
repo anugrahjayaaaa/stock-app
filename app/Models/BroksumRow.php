@@ -13,7 +13,7 @@ class BroksumRow extends Model
     protected $table = 'broksum_rows';
 
     protected $fillable = [
-        'stock_code', 'date', 'market_type', 'investor_type',
+        'stock_code', 'date', 'tx_type', 'market_type', 'investor_type',
         'broker_code', 'side', 'lot', 'val', 'avg', 'freq',
     ];
 
