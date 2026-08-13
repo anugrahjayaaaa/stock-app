@@ -3,8 +3,6 @@
 namespace App\Services\BrokerSummary;
 
 use App\Models\BroksumRow;
-use App\Services\Stockbit\StockbitClient;
-use App\Services\Stockbit\StockbitParser;
 
 /**
  * Broker Summary — reads GROSS rows from broksum_rows and derives the view:
@@ -16,11 +14,6 @@ use App\Services\Stockbit\StockbitParser;
  */
 class BrokerSummaryService
 {
-    public function __construct(
-        private StockbitClient $client,
-        private StockbitParser $parser,
-    ) {}
-
     /**
      * @return array{buyers:array,sellers:array,bandar:array,total:array,code:string,from:string,to:string,txType:string,board:string,investor:string,error?:int}
      */
@@ -52,26 +45,14 @@ class BrokerSummaryService
             return $this->gross($rows, $code, $date, $txType, $board, $investor);
         }
 
-        // NET: fetch Stockbit NET directly (bandar detector matches Stockbit 100%;
-        // not stored because time ranges vary and gross is the DB source of truth).
-        return $this->netLive($code, $date, $txType, $board, $investor);
+        // NET: derive from stored GROSS (no Stockbit call in request path).
+        return $this->net($rows, $code, $date, $txType, $board, $investor, $markets, $investors);
     }
 
-    private function netLive(string $code, string $date, string $txType, string $board, string $investor): array
+    private function net($rows, string $code, string $date, string $txType, string $board, string $investor, array $markets, array $investors): array
     {
-        $data = $this->client->marketDetector(
-            strtoupper($code), $date, $date,
-            'TRANSACTION_TYPE_NET', $board, $investor
-        );
-
-        if (isset($data['error'])) {
-            return $this->empty($code, $date, $date, $txType, $board, $investor,
-                "Gagal mengambil data Net dari Stockbit (HTTP {$data['error']}).");
-        }
-
-        $parsed = $this->parser->parse($data);
-        $buyers = $parsed['buyers'];
-        $sellers = $parsed['sellers'];
+        $buyers = $this->side($rows, 'buy');
+        $sellers = $this->side($rows, 'sell');
         $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
         return array_merge([
@@ -89,21 +70,6 @@ class BrokerSummaryService
                 'accdist' => $bandar['broker_accdist'],
             ],
         ], $this->meta($code, $date, $txType, $board, $investor));
-    }
-
-    /** Read stored Stockbit NET bandar_detector for the axis (markets/investors are single-value arrays). */
-    private function bandarFromDb(string $code, string $date, array $markets, array $investors): ?array
-    {
-        $m = $markets[0] ?? 'all';
-        $i = $investors[0] ?? 'all';
-
-        $row = BroksumBandar::where('stock_code', strtoupper($code))
-            ->where('date', $date)
-            ->where('market_type', $m)
-            ->where('investor_type', $i)
-            ->first();
-
-        return $row?->bandar;
     }
 
     private function gross($rows, string $code, string $date, string $txType, string $board, string $investor): array
