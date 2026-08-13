@@ -35,7 +35,9 @@ class BrokerSummaryService
             ->where('tx_type', $txStored)
             ->whereIn('market_type', $markets)
             ->whereIn('investor_type', $investors)
-            ->get(['broker_code', 'side', 'lot', 'val', 'avg', 'freq']);
+            ->selectRaw('broker_code, side, SUM(lot) as lot, SUM(val) as val, AVG(avg) as avg, SUM(freq) as freq')
+            ->groupBy('broker_code', 'side')
+            ->get();
 
         if ($rows->isEmpty()) {
             return $this->empty($code, $from, $to, $txType, $board, $investor, 'Tidak ada data di database untuk filter ini.');
@@ -55,9 +57,21 @@ class BrokerSummaryService
         $sellers = $this->side($rows, 'sell');
         $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
+        // NET = one row per broker (buy - sell aggregated); split by sign.
+        $net = $this->netSide($buyers, $sellers);
+        $netBuyers = [];
+        $netSellers = [];
+        foreach ($net as $r) {
+            if ($r['lot'] >= 0) {
+                $netBuyers[] = $r;
+            } else {
+                $netSellers[] = ['code' => $r['code'], 'lot' => -$r['lot'], 'val' => -$r['val'], 'avg' => $r['avg'], 'freq' => $r['freq'], 'cat' => $r['cat'], 'volRaw' => formatShort(-$r['lot']), 'valRaw' => formatShort(-$r['val']), 'avgRaw' => number_format($r['avg'], 2)];
+            }
+        }
+
         return array_merge([
-            'buyers' => $buyers,
-            'sellers' => $sellers,
+            'buyers' => $netBuyers,
+            'sellers' => $netSellers,
             'bandar' => $bandar,
             'total' => [
                 'value' => $bandar['value'],
