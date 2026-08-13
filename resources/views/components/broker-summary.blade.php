@@ -46,7 +46,7 @@
         @endif
 
         {{-- Bandar Detector: Stockbit skeleton = 3 sub-tables (Acc/Dist, Broker summary, Net summary). Net only. --}}
-        <div id="bs-bandar" class="mb-3 @if($txType !== 'TRANSACTION_TYPE_NET' || empty($bandar)) d-none @endif">
+        <div id="bs-bandar" class="mb-3 @if($txType !== 'TRANSACTION_TYPE_NET' || empty($bandar)) d-none @endif" style="max-width: 400px;">
             @if ($txType === 'TRANSACTION_TYPE_NET' && !empty($bandar))
                 @include('components.broker-bandar', ['bandar' => $bandar])
             @endif
