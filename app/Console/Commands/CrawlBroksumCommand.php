@@ -14,7 +14,8 @@ use Illuminate\Console\Command;
  *
  * ponytail: GROSS parser shape (field names) unverified vs NET — revisit storeSide
  *           if Stockbit returns different keys for gross buy/sell.
- * ponytail: ng market param guessed (MARKET_BOARD_NEGOTIATION) — confirm against API.
+ // ponytail: tn row count can be 0 for thinly-traded stocks — expected, not an error.
+ // ponytail: ng market param confirmed MARKET_BOARD_NEGO (not NEGOTIATION) vs API.
  */
 class CrawlBroksumCommand extends Command
 {
@@ -26,7 +27,7 @@ class CrawlBroksumCommand extends Command
     private const MARKETS = [
         'rg' => 'MARKET_BOARD_REGULER',
         'tn' => 'MARKET_BOARD_TUNAI',
-        'ng' => 'MARKET_BOARD_NEGOTIATION',
+        'ng' => 'MARKET_BOARD_NEGO',
     ];
 
     // local key => Stockbit investor_type param
