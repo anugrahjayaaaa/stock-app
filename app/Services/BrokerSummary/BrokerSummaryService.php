@@ -130,6 +130,9 @@ class BrokerSummaryService
             ];
         }
 
+        // ponytail: UI top buyer/seller = val desc, then lot desc.
+        usort($out, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
+
         return $out;
     }
 
