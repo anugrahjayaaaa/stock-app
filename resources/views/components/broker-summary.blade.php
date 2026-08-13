@@ -112,8 +112,8 @@
                 <table class="table table-sm table-hover mb-0 align-middle" style="font-size:11px;font-family:monospace;">
                     <thead class="table-light sticky-top">
                         <tr>
-                            <th>Buy</th><th>Type</th><th class="text-center">Lot</th><th class="text-center">Val</th><th class="text-center">Avg</th><th class="text-center">Freq</th>
-                            <th>Sell</th><th>Type</th><th class="text-center">Lot</th><th class="text-center">Val</th><th class="text-center">Avg</th><th class="text-center">Freq</th>
+                            <th>Buy</th><th class="text-center">Val</th><th class="text-center">Lot</th><th class="text-center">Avg</th><th class="text-center">Freq</th>
+                            <th>Sell</th><th class="text-center">Val</th><th class="text-center">Lot</th><th class="text-center">Avg</th><th class="text-center">Freq</th>
                         </tr>
                     </thead>
                     <tbody id="bs-rows">
@@ -146,7 +146,7 @@
             btn.disabled = true; btn.textContent = 'Memuat…';
             fetch(url).then(function (r) { return r.json(); }).then(function (d) {
                 if (d.error) {
-                    document.getElementById('bs-rows').innerHTML = '<tr><td colspan="12" class="text-center text-danger py-3">Gagal (HTTP ' + d.error + '). Token expired?</td></tr>';
+                    document.getElementById('bs-rows').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-3">Gagal (HTTP ' + d.error + '). Token expired?</td></tr>';
                     return;
                 }
                 var html = '';
@@ -154,14 +154,14 @@
                 for (var i = 0; i < n; i++) {
                     var b = d.buyers[i], s = d.sellers[i];
                     html += '<tr>';
-                    html += b ? '<td>' + b.code + '</td><td>' + b.type + '</td><td class="text-center">' + b.volRaw + '</td><td class="text-center">' + b.valRaw + '</td><td class="text-center">' + b.avgRaw + '</td><td class="text-center">' + b.freq + '</td>' : '<td colspan="6"></td>';
-                    html += s ? '<td>' + s.code + '</td><td>' + s.type + '</td><td class="text-center">' + s.volRaw + '</td><td class="text-center">' + s.valRaw + '</td><td class="text-center">' + s.avgRaw + '</td><td class="text-center">' + s.freq + '</td>' : '<td colspan="6"></td>';
+                    html += b ? '<td>' + b.code + '</td><td class="text-center">' + b.valRaw + '</td><td class="text-center">' + b.volRaw + '</td><td class="text-center">' + b.avgRaw + '</td><td class="text-center">' + b.freq + '</td>' : '<td colspan="5"></td>';
+                    html += s ? '<td>' + s.code + '</td><td class="text-center">' + s.valRaw + '</td><td class="text-center">' + s.volRaw + '</td><td class="text-center">' + s.avgRaw + '</td><td class="text-center">' + s.freq + '</td>' : '<td colspan="5"></td>';
                     html += '</tr>';
                 }
-                if (!n) html = '<tr><td colspan="12" class="text-center text-muted py-3">Tidak ada data untuk filter ini.</td></tr>';
+                if (!n) html = '<tr><td colspan="10" class="text-center text-muted py-3">Tidak ada data untuk filter ini.</td></tr>';
                 document.getElementById('bs-rows').innerHTML = html;
             }).catch(function () {
-                document.getElementById('bs-rows').innerHTML = '<tr><td colspan="12" class="text-center text-danger py-3">Gagal mengambil data Stockbit.</td></tr>';
+                document.getElementById('bs-rows').innerHTML = '<tr><td colspan="10" class="text-center text-danger py-3">Gagal mengambil data Stockbit.</td></tr>';
             }).finally(function () {
                 btn.disabled = false; btn.textContent = 'Ambil dari Stockbit';
             });
