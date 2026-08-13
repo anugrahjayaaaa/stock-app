@@ -55,9 +55,21 @@ class BrokerSummaryService
         $sellers = $this->side($rows, 'sell');
         $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
+        // NET view = net-per-broker: positive -> buyer(col accumulator), negative -> seller(col distributor).
+        $net = $this->netSide($buyers, $sellers);
+        $netBuyers = [];
+        $netSellers = [];
+        foreach ($net as $r) {
+            if ($r['lot'] >= 0) {
+                $netBuyers[] = $r;
+            } else {
+                $netSellers[] = ['code' => $r['code'], 'lot' => -$r['lot'], 'val' => -$r['val'], 'avg' => $r['avg'], 'freq' => $r['freq'], 'cat' => $r['cat'], 'volRaw' => formatShort(-$r['lot']), 'valRaw' => formatShort(-$r['val']), 'avgRaw' => number_format($r['avg'], 2)];
+            }
+        }
+
         return array_merge([
-            'buyers' => $buyers,
-            'sellers' => $sellers,
+            'buyers' => $netBuyers,
+            'sellers' => $netSellers,
             'bandar' => $bandar,
             'total' => [
                 'value' => $bandar['value'],
@@ -105,6 +117,36 @@ class BrokerSummaryService
         }
 
         // ponytail: UI top buyer/seller = val desc, then lot desc.
+        usort($out, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
+
+        return $out;
+    }
+
+    /** Merge buy/sell per broker into net rows (lot/val = buy - sell), sorted by net val desc. */
+    private function netSide(array $buyers, array $sellers): array
+    {
+        $byCode = [];
+        foreach ($buyers as $r) {
+            $byCode[$r['code']] = ['code' => $r['code'], 'lot' => $r['lot'], 'val' => $r['val'], 'avg' => $r['avg'], 'freq' => $r['freq'], 'cat' => $r['cat']];
+        }
+        foreach ($sellers as $r) {
+            if (!isset($byCode[$r['code']])) {
+                $byCode[$r['code']] = ['code' => $r['code'], 'lot' => 0, 'val' => 0, 'avg' => $r['avg'], 'freq' => 0, 'cat' => $r['cat']];
+            }
+            $byCode[$r['code']]['lot'] -= $r['lot'];
+            $byCode[$r['code']]['val'] -= $r['val'];
+            $byCode[$r['code']]['freq'] += $r['freq'];
+        }
+
+        $out = array_values($byCode);
+        foreach ($out as &$r) {
+            $r['volRaw'] = formatShort($r['lot']);
+            $r['valRaw'] = formatShort($r['val']);
+            $r['avgRaw'] = number_format($r['avg'], 2);
+        }
+        unset($r);
+
+        // ponytail: net view sorted by val desc (then lot desc).
         usort($out, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
 
         return $out;
