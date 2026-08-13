@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\BroksumRow;
 use App\Models\Stock;
-use App\Services\StockbitClient;
-use App\Services\StockbitParser;
+use App\Services\Stockbit\StockbitClient;
+use App\Services\Stockbit\StockbitParser;
 use Illuminate\Console\Command;
 
 /**

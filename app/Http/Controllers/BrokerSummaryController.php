@@ -51,6 +51,7 @@ class BrokerSummaryController extends Controller
             'sellers' => $bs['sellers'],
             'bandar' => $bs['bandar'],
             'total' => $bs['total'],
+            'message' => $bs['message'] ?? null,
             'error' => $bs['error'] ?? null,
         ]);
     }

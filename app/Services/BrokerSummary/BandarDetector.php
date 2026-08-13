@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\BrokerSummary;
 
 /**
  * Derive Stockbit-style bandar detector from GROSS broker rows

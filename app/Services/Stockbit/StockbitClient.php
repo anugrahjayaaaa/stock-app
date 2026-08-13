@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Stockbit;
 
 use Illuminate\Support\Facades\Http;
 

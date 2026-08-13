@@ -40,8 +40,8 @@
             <button id="bs-trigger" class="btn btn-sm btn-outline-secondary ms-auto" data-route="{{ $triggerRoute }}">Ambil</button>
         </div>
 
-        @if ($error ?? false)
-            <div class="alert alert-danger py-2 small mb-2">Gagal mengambil data Stockbit (HTTP {{ $error }}). Token mungkin expired.</div>
+        @if ($message ?? false)
+            <div class="alert alert-info py-2 small mb-2">{{ $message }}</div>
         @endif
 
         {{-- Bandar Detector: Stockbit skeleton = 3 sub-tables (Acc/Dist, Broker summary, Net summary). Net only. --}}
