@@ -30,6 +30,13 @@ class BrokerSummaryService
 
         $txStored = $txType === 'TRANSACTION_TYPE_GROSS' ? 'gross' : 'net';
 
+        // ponytail: range NET must derive from GROSS (net cancels across days);
+        // single-day NET uses stored net rows (exact match Stockbit).
+        $isRange = $from !== $to;
+        if ($txType === 'TRANSACTION_TYPE_NET' && $isRange) {
+            $txStored = 'gross';
+        }
+
         $rows = BroksumRow::where('stock_code', strtoupper($code))
             ->whereBetween('date', [$from, $to])
             ->where('tx_type', $txStored)
@@ -47,15 +54,14 @@ class BrokerSummaryService
             return $this->gross($rows, $code, $from, $to, $txType, $board, $investor);
         }
 
-        // NET rows are already net-per-broker (crawled from Stockbit NET source).
-        return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors);
+        // NET: single-day = stored net rows (exact); range = net from gross (cancels across days).
+        return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors, $isRange);
     }
 
-    private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors): array
+    private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors, bool $isRange): array
     {
         $buyers = $this->side($rows, 'buy');
         $sellers = $this->side($rows, 'sell');
-        $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
         // NET = one row per broker (buy - sell aggregated); split by sign.
         $net = $this->netSide($buyers, $sellers);
@@ -68,6 +74,9 @@ class BrokerSummaryService
                 $netSellers[] = ['code' => $r['code'], 'lot' => -$r['lot'], 'val' => -$r['val'], 'avg' => $r['avg'], 'freq' => $r['freq'], 'cat' => $r['cat'], 'volRaw' => formatShort(-$r['lot']), 'valRaw' => formatShort(-$r['val']), 'avgRaw' => number_format($r['avg'], 2)];
             }
         }
+
+        // bandar from NET-per-broker (not gross) so range cancels across days.
+        $bandar = (new BandarDetector())->compute($netBuyers, $netSellers);
 
         // ponytail: NET sellers also val desc.
         usort($netSellers, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
