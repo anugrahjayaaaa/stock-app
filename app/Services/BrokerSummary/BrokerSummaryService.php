@@ -2,7 +2,6 @@
 
 namespace App\Services\BrokerSummary;
 
-use App\Models\BroksumBandar;
 use App\Models\BroksumRow;
 use App\Services\Stockbit\StockbitClient;
 use App\Services\Stockbit\StockbitParser;
@@ -53,16 +52,27 @@ class BrokerSummaryService
             return $this->gross($rows, $code, $date, $txType, $board, $investor);
         }
 
-        return $this->net($rows, $code, $date, $txType, $board, $investor, $markets, $investors);
+        // NET: fetch Stockbit NET directly (bandar detector matches Stockbit 100%;
+        // not stored because time ranges vary and gross is the DB source of truth).
+        return $this->netLive($code, $date, $txType, $board, $investor);
     }
 
-    private function net($rows, string $code, string $date, string $txType, string $board, string $investor, array $markets, array $investors): array
+    private function netLive(string $code, string $date, string $txType, string $board, string $investor): array
     {
-        $buyers = $this->side($rows, 'buy');
-        $sellers = $this->side($rows, 'sell');
+        $data = $this->client->marketDetector(
+            strtoupper($code), $date, $date,
+            'TRANSACTION_TYPE_NET', $board, $investor
+        );
 
-        $bandar = $this->bandarFromDb($code, $date, $markets, $investors)
-            ?? (new BandarDetector())->compute($buyers, $sellers); // fallback if NET not crawled
+        if (isset($data['error'])) {
+            return $this->empty($code, $date, $date, $txType, $board, $investor,
+                "Gagal mengambil data Net dari Stockbit (HTTP {$data['error']}).");
+        }
+
+        $parsed = $this->parser->parse($data);
+        $buyers = $parsed['buyers'];
+        $sellers = $parsed['sellers'];
+        $bandar = (new BandarDetector())->compute($buyers, $sellers);
 
         return array_merge([
             'buyers' => $buyers,
