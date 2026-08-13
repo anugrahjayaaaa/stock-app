@@ -75,7 +75,10 @@ class BrokerSummaryService
         }
 
         // bandar from NET-per-broker (not gross) so range cancels across days.
-        $bandar = (new BandarDetector())->compute($netBuyers, $netSellers);
+        // DISABLED: Stockbit bandar_detector is an A/D index needing per-broker H/L/C
+        // ticks absent from the response; our net-lot approximation diverges on tiers.
+        // $bandar = (new BandarDetector())->compute($netBuyers, $netSellers);
+        $bandar = [];
 
         // ponytail: NET sellers also val desc.
         usort($netSellers, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
@@ -85,14 +88,14 @@ class BrokerSummaryService
             'sellers' => $netSellers,
             'bandar' => $bandar,
             'total' => [
-                'value' => $bandar['value'],
-                'volume' => $bandar['volume'],
-                'valueRaw' => formatShort($bandar['value']),
-                'volumeRaw' => formatShort($bandar['volume']).' Lot',
-                'avgPrice' => $bandar['average'],
-                'buyers' => $bandar['total_buyer'],
-                'sellers' => $bandar['total_seller'],
-                'accdist' => $bandar['broker_accdist'],
+                'value' => array_sum(array_column($netBuyers, 'val')) + array_sum(array_column($netSellers, 'val')),
+                'volume' => array_sum(array_column($netBuyers, 'lot')) + array_sum(array_column($netSellers, 'lot')),
+                'valueRaw' => formatShort(array_sum(array_column($netBuyers, 'val')) + array_sum(array_column($netSellers, 'val'))),
+                'volumeRaw' => formatShort(array_sum(array_column($netBuyers, 'lot')) + array_sum(array_column($netSellers, 'lot'))).' Lot',
+                'avgPrice' => 0,
+                'buyers' => count($netBuyers),
+                'sellers' => count($netSellers),
+                'accdist' => '-',
             ],
         ], $this->meta($code, $from, $to, $txType, $board, $investor));
     }
