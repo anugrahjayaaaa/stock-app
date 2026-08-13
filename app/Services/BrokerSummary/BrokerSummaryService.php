@@ -30,12 +30,8 @@ class BrokerSummaryService
 
         $txStored = $txType === 'TRANSACTION_TYPE_GROSS' ? 'gross' : 'net';
 
-        // ponytail: range NET must derive from GROSS (net cancels across days);
-        // single-day NET uses stored net rows (exact match Stockbit).
-        $isRange = $from !== $to;
-        if ($txType === 'TRANSACTION_TYPE_NET' && $isRange) {
-            $txStored = 'gross';
-        }
+        // ponytail: range NET reads stored net rows (exact per day), summed per broker.
+        // (Stockbit range net ≠ sum of daily net-volumes; must net per broker first.)
 
         $rows = BroksumRow::where('stock_code', strtoupper($code))
             ->whereBetween('date', [$from, $to])
@@ -55,10 +51,10 @@ class BrokerSummaryService
         }
 
         // NET: single-day = stored net rows (exact); range = net from gross (cancels across days).
-        return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors, $isRange);
+        return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors);
     }
 
-    private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors, bool $isRange): array
+    private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors): array
     {
         $buyers = $this->side($rows, 'buy');
         $sellers = $this->side($rows, 'sell');
