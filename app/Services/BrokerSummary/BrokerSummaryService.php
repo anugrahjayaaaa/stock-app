@@ -69,6 +69,9 @@ class BrokerSummaryService
             }
         }
 
+        // ponytail: NET sellers also val desc.
+        usort($netSellers, fn ($a, $b) => $b['val'] <=> $a['val'] ?: $b['lot'] <=> $a['lot']);
+
         return array_merge([
             'buyers' => $netBuyers,
             'sellers' => $netSellers,
