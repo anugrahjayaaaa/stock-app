@@ -1,5 +1,5 @@
 {{-- Broker Summary widget (Stockbit market-detector style).
-     Props: ticker, from, to, txType, board, investor, stocks[], buyers[], sellers[], bandar[], total[], error, ipottRoute --}}
+     Props: ticker, from, to, txType, board, investor, stocks[], buyers[], sellers[], bandar[], total[], error, triggerRoute --}}
 <div class="card card-outline card-secondary h-100">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="card-title mb-0"><i class="fas fa-balance-scale me-1 text-secondary"></i> Broker Summary
@@ -75,7 +75,7 @@
                 @endforeach
             </datalist>
             @endisset
-            <button id="bs-ipott" class="btn btn-sm btn-outline-secondary ms-auto" data-route="{{ $ipottRoute }}">Ambil dari Stockbit</button>
+            <button id="bs-trigger" class="btn btn-sm btn-outline-secondary ms-auto" data-route="{{ $triggerRoute }}">Ambil dari Stockbit</button>
         </div>
 
         @if ($error ?? false)
@@ -124,10 +124,10 @@
         </div>
     </div>
 
-    @if (!empty($ipottRoute))
+    @if (!empty($triggerRoute))
     <script>
     (function () {
-        var btn = document.getElementById('bs-ipott');
+        var btn = document.getElementById('bs-trigger');
         if (!btn) return;
         btn.addEventListener('click', function () {
             var code = (document.getElementById('bs-search').value || '').trim().toUpperCase();

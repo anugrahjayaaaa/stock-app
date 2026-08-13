@@ -16,7 +16,7 @@
                     :buyers="$buyers" :sellers="$sellers"
                     :bandar="$bandar" :total="$total"
                     :error="$error"
-                    :ipott-route="route('stock.broker-summary.data', ['code' => 'PLACEHOLDER'])" />
+                    :trigger-route="route('stock.broker-summary.data', ['code' => 'PLACEHOLDER'])" />
             </div>
         </div>
     </div>
