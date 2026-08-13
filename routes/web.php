@@ -45,6 +45,8 @@ Route::middleware(['auth', 'permission:view stock charts'])->group(function () {
 });
 Route::middleware(['auth', 'permission:view stock analysis'])->group(function () {
     Route::get('/stock/analyze', [StockAnalysisController::class, 'index'])->name('stock.analyze');
+    Route::get('/stock/broker-summary', [BrokerSummaryController::class, 'index'])->name('stock.broker-summary');
+    Route::get('/stock/broker-summary/{code}', [BrokerSummaryController::class, 'data'])->name('stock.broker-summary.data');
 });
 Route::middleware(['auth', 'permission:view brokers'])->group(function () {
     Route::get('/stock/brokers', [BrokerController::class, 'index'])->name('stock.brokers');

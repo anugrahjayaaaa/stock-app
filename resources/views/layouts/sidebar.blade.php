@@ -87,6 +87,13 @@
                         <p>Stock Analysis</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('stock.broker-summary') }}"
+                       class="nav-link {{ request()->routeIs('stock.broker-summary*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-balance-scale"></i>
+                        <p>Broker Summary</p>
+                    </a>
+                </li>
                 @endcan
             </ul>
         </nav>
