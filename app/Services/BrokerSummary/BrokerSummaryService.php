@@ -28,31 +28,28 @@ class BrokerSummaryService
         $markets = $this->markets($board);   // ['rg', ...]
         $investors = $this->investors($investor); // ['f', 'd']
 
-        // ALL date range -> use the latest date present (crawler stores per-day).
-        $date = $this->resolveDate($code, $from, $to, $markets, $investors);
-
-        if ($date === null) {
-            return $this->empty($code, $from, $to, $txType, $board, $investor, 'Tidak ada data di database untuk filter ini.');
-        }
-
         $txStored = $txType === 'TRANSACTION_TYPE_GROSS' ? 'gross' : 'net';
 
         $rows = BroksumRow::where('stock_code', strtoupper($code))
-            ->where('date', $date)
+            ->whereBetween('date', [$from, $to])
             ->where('tx_type', $txStored)
             ->whereIn('market_type', $markets)
             ->whereIn('investor_type', $investors)
             ->get(['broker_code', 'side', 'lot', 'val', 'avg', 'freq']);
 
+        if ($rows->isEmpty()) {
+            return $this->empty($code, $from, $to, $txType, $board, $investor, 'Tidak ada data di database untuk filter ini.');
+        }
+
         if ($txType === 'TRANSACTION_TYPE_GROSS') {
-            return $this->gross($rows, $code, $date, $txType, $board, $investor);
+            return $this->gross($rows, $code, $from, $to, $txType, $board, $investor);
         }
 
         // NET rows are already net-per-broker (crawled from Stockbit NET source).
-        return $this->net($rows, $code, $date, $txType, $board, $investor, $markets, $investors);
+        return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors);
     }
 
-    private function net($rows, string $code, string $date, string $txType, string $board, string $investor, array $markets, array $investors): array
+    private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors): array
     {
         $buyers = $this->side($rows, 'buy');
         $sellers = $this->side($rows, 'sell');
@@ -72,17 +69,17 @@ class BrokerSummaryService
                 'sellers' => $bandar['total_seller'],
                 'accdist' => $bandar['broker_accdist'],
             ],
-        ], $this->meta($code, $date, $txType, $board, $investor));
+        ], $this->meta($code, $from, $to, $txType, $board, $investor));
     }
 
-    private function gross($rows, string $code, string $date, string $txType, string $board, string $investor): array
+    private function gross($rows, string $code, string $from, string $to, string $txType, string $board, string $investor): array
     {
         return array_merge([
             'buyers' => $this->side($rows, 'buy'),
             'sellers' => $this->side($rows, 'sell'),
             'bandar' => [],
             'total' => [],
-        ], $this->meta($code, $date, $txType, $board, $investor));
+        ], $this->meta($code, $from, $to, $txType, $board, $investor));
     }
 
     /** Map rows of one side into UI-ready broker rows (ownership color via Broker). */
@@ -143,24 +140,6 @@ class BrokerSummaryService
         return $out;
     }
 
-    private function resolveDate(string $code, string $from, string $to, array $markets, array $investors): ?string
-    {
-        if ($from === $to) {
-            return BroksumRow::where('stock_code', strtoupper($code))
-                ->where('date', $from)
-                ->whereIn('market_type', $markets)
-                ->whereIn('investor_type', $investors)
-                ->exists() ? $from : null;
-        }
-
-        // ponytail: ALL-date view = latest stored day in range (crawler is per-day).
-        return BroksumRow::where('stock_code', strtoupper($code))
-            ->whereBetween('date', [$from, $to])
-            ->whereIn('market_type', $markets)
-            ->whereIn('investor_type', $investors)
-            ->max('date');
-    }
-
     private function markets(string $board): array
     {
         return match ($board) {
@@ -180,12 +159,12 @@ class BrokerSummaryService
         };
     }
 
-    private function meta(string $code, string $date, string $txType, string $board, string $investor): array
+    private function meta(string $code, string $from, string $to, string $txType, string $board, string $investor): array
     {
         return [
             'code' => strtoupper($code),
-            'from' => $date,
-            'to' => $date,
+            'from' => $from,
+            'to' => $to,
             'txType' => $txType,
             'board' => $board,
             'investor' => $investor,
@@ -200,6 +179,6 @@ class BrokerSummaryService
             'bandar' => [],
             'total' => [],
             'message' => $msg,
-        ], $this->meta($code, $from, $txType, $board, $investor));
+        ], $this->meta($code, $from, $to, $txType, $board, $investor));
     }
 }
