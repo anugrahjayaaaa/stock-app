@@ -3,11 +3,20 @@
 namespace App\Services\BrokerSummary;
 
 /**
- * Derive Stockbit-style bandar detector from GROSS broker rows
- * (buyers + sellers), so it can be recomputed from DB-stored gross
- * without re-calling Stockbit later.
+ * Bandar detector — our approximation derived from net-per-broker rows.
  *
- * net = buy - sell per broker. Acc = net buyer, Dist = net seller.
+ * IMPORTANT (verified against Stockbit, BIPI 11-12 Aug 2026):
+ *  - Stockbit `bandar_detector.volume` / `total_buyer` / `total_seller` = plain
+ *    net-lot accumulation. We match those ~99.5% from stored net rows.
+ *  - Stockbit `top1..top10.vol` / `accdist` are NOT raw net lots. They are an
+ *    Accumulation/Distribution index (price×volume per broker) that needs
+ *    per-broker high/low/close ticks — which the broker_summary response does
+ *    NOT include. So top-tier vol/accdist here will differ from Stockbit.
+ *  - Broker LIST (AK, ZP, CC...) and per-broker net lot ARE exact (we crawl
+ *    Stockbit NET source). Only the A/D scoring of tiers is unreproducible.
+ *
+ * Ours: net = buy - sell per broker; Acc = net buyer, Dist = net seller.
+ * Tier vol = sum of net lot of that tier (matches Stockbit volume, not A/D).
  * Output shape matches StockbitParser::bandar() so it feeds <x-broker-bandar>.
  */
 class BandarDetector

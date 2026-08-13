@@ -50,12 +50,15 @@ class BrokerSummaryService
             return $this->gross($rows, $code, $from, $to, $txType, $board, $investor);
         }
 
-        // NET: single-day = stored net rows (exact); range = net from gross (cancels across days).
+        // NET: reads stored net rows (tx_type=net) for both single-day and range.
+        // Range = SUM net-per-broker across days (cancels correctly); exact per day.
         return $this->net($rows, $code, $from, $to, $txType, $board, $investor, $markets, $investors);
     }
 
     private function net($rows, string $code, string $from, string $to, string $txType, string $board, string $investor, array $markets, array $investors): array
     {
+        // ponytail: bandar vol/total match Stockbit ~99.5%; top-tier A/D scoring
+        // is unreproducible (needs per-broker H/L/C ticks absent from the response).
         $buyers = $this->side($rows, 'buy');
         $sellers = $this->side($rows, 'sell');
 
