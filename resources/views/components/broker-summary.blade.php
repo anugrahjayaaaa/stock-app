@@ -109,23 +109,18 @@
                     row('Top 10', b.top10) + row('Average', b.avg);
                 var diff = (b.total_buyer || 0) - (b.total_seller || 0);
                 bandarEl.innerHTML =
-                    '<div class="small" style="font-size:10px;line-height:1.35;">' +
-                    '<table class="table table-sm table-borderless mb-1 align-middle" style="font-size:10px;">' +
+                    '<div class="small" style="font-size:10px;line-height:1.2;">' +
+                    '<table class="table table-sm table-borderless mb-0 align-middle" style="font-size:10px;">' +
                         '<thead class="text-muted"><tr><th class="py-0">Top</th><th class="text-end py-0">Volume</th><th class="text-end py-0">%</th><th class="text-end py-0">Rp(B)</th><th class="text-center py-0">A/D</th></tr></thead>' +
                         '<tbody>' +
-                            row('Top 1', b.top1) + row('Top 3', b.top3) + row('Top 5', b.top5) +
-                            row('Top 10', b.top10) + row('Average', b.avg) +
+                            row('Top 1', b.top1) + row('Top 3', b.top3) + row('Average', b.avg) +
                         '</tbody></table>' +
-                    '<div class="d-flex flex-wrap gap-2 align-items-center mb-1">' +
-                        '<span class="text-muted">Total:</span>' +
-                        '<span class="badge bg-secondary-subtle text-secondary">Buy ' + (b.total_buyer || 0) + '</span>' +
-                        '<span class="badge bg-secondary-subtle text-secondary">Sell ' + (b.total_seller || 0) + '</span>' +
+                    '<div class="d-flex flex-wrap gap-2 align-items-center border-top pt-1">' +
                         '<span class="badge ' + ad(b.broker_accdist) + '">' + (b.broker_accdist || '-') + '</span>' +
-                    '</div>' +
-                    '<div class="d-flex flex-wrap gap-3 border-top pt-1">' +
-                        '<span><span class="text-muted">Net Vol: </span><b>' + Number(b.volume || 0).toLocaleString('en-US') + '</b></span>' +
-                        '<span><span class="text-muted">Net Val: </span><b>' + (Number(b.value || 0) / 1e9).toFixed(1) + 'B</b></span>' +
-                        '<span><span class="text-muted">Avg: </span><b>' + Number(b.average || 0).toFixed(2) + '</b></span>' +
+                        '<span><span class="text-muted">Vol </span><b>' + Number(b.volume || 0).toLocaleString('en-US') + '</b></span>' +
+                        '<span><span class="text-muted">Val </span><b>' + (Number(b.value || 0) / 1e9).toFixed(1) + 'B</b></span>' +
+                        '<span><span class="text-muted">Avg </span><b>' + Number(b.average || 0).toFixed(2) + '</b></span>' +
+                        '<span class="text-muted">B' + (b.total_buyer || 0) + '/S' + (b.total_seller || 0) + '</span>' +
                     '</div></div>';
                 bandarEl.classList.remove('d-none');
             } else {
