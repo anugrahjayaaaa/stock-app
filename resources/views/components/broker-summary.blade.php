@@ -181,7 +181,7 @@
             }).catch(function () {
                 document.getElementById('bs-rows').innerHTML = '<tr><td colspan="11" class="text-center text-danger py-3">Gagal mengambil data Stockbit.</td></tr>';
             }).finally(function () {
-                btn.disabled = false; btn.textContent = 'Ambil dari Stockbit';
+                btn.disabled = false; btn.textContent = 'Ambil';
             });
         });
     })();
