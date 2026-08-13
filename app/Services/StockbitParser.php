@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Broker;
+
 /**
  * Parse Stockbit market-detector JSON into a UI-ready shape.
  *
@@ -62,6 +64,7 @@ class StockbitParser
             'volRaw' => formatShort($lot),
             'valRaw' => formatShort($val),
             'avgRaw' => number_format($avg, 2),
+            'cat' => Broker::categoryClass($r['netbs_broker_code'] ?? ''),
         ];
     }
 

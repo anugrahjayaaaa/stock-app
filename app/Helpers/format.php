@@ -20,3 +20,20 @@ function formatShort(int $v): string
 
     return $neg.(string) $v;
 }
+
+/**
+ * Map a Stockbit accdist label to a Bootstrap color utility (subtle bg + text).
+ * Dist* → danger (red), *Acc* → success (green), else neutral.
+ */
+function accdistClass(string $label): string
+{
+    $l = strtolower($label);
+    if (str_contains($l, 'dist')) {
+        return 'bg-danger-subtle text-danger';
+    }
+    if (str_contains($l, 'acc')) {
+        return 'bg-success-subtle text-success';
+    }
+
+    return 'bg-secondary-subtle text-secondary';
+}
