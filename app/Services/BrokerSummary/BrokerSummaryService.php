@@ -160,7 +160,7 @@ class BrokerSummaryService
             'MARKET_BOARD_TUNAI' => ['tn'],
             'MARKET_BOARD_REGULER' => ['rg'],
             'MARKET_BOARD_NEGO' => ['ng'],
-            default => ['rg', 'tn', 'ng'], // ALL
+            default => ['all'], // Stockbit ALL is a stored server-side view, not a SUM
         };
     }
 
@@ -169,7 +169,7 @@ class BrokerSummaryService
         return match ($investor) {
             'INVESTOR_TYPE_FOREIGN' => ['f'],
             'INVESTOR_TYPE_DOMESTIC' => ['d'],
-            default => ['f', 'd'], // ALL
+            default => ['all'], // stored server-side view
         };
     }
 

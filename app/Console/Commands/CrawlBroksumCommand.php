@@ -9,19 +9,19 @@ use App\Services\Stockbit\StockbitParser;
 use Illuminate\Console\Command;
 
 /**
- * Crawl Stockbit broksum (GROSS) for every market×investor combo and store rows.
- * Run via scheduler later; ALL axis is derived from stored rows, never fetched.
+ * Crawl Stockbit broksum (GROSS) for every market×investor combo + the ALL
+ * server-side views, and store rows. Stockbit "All" is a precompute, NOT a
+ * sum of grains — so it must be fetched and stored as its own rows.
  *
- * ponytail: GROSS parser shape (field names) unverified vs NET — revisit storeSide
- *           if Stockbit returns different keys for gross buy/sell.
- // ponytail: tn row count can be 0 for thinly-traded stocks — expected, not an error.
- // ponytail: ng market param confirmed MARKET_BOARD_NEGO (not NEGOTIATION) vs API.
+ * ponytail: tn row count can be 0 for thinly-traded stocks — expected, not error.
+ * ponytail: ng market param confirmed MARKET_BOARD_NEGO (not NEGOTIATION).
+ * ponytail: GROSS field names assumed = NET (blot/bval/slot/sval); revisit if gross differs.
  */
 class CrawlBroksumCommand extends Command
 {
     protected $signature = 'broksum:crawl {--date=} {--symbol=}';
 
-    protected $description = 'Crawl Stockbit GROSS broksum (market×investor) into broksum_rows';
+    protected $description = 'Crawl Stockbit GROSS broksum (market×investor + ALL views) into broksum_rows';
 
     // local key => Stockbit market_board param
     private const MARKETS = [
@@ -45,28 +45,46 @@ class CrawlBroksumCommand extends Command
 
         $saved = 0;
         foreach ($symbols as $code) {
+            // 1) granular grains (f/d × rg/tn/ng)
             foreach (self::MARKETS as $mKey => $mParam) {
                 foreach (self::INVESTORS as $iKey => $iParam) {
-                    $data = $client->marketDetector(
-                        $code, $date, $date,
-                        'TRANSACTION_TYPE_GROSS', $mParam, $iParam
-                    );
-
-                    if (isset($data['error'])) {
-                        $this->warn("{$code}/{$mKey}/{$iKey}: HTTP {$data['error']}");
-                        continue;
-                    }
-
-                    $parsed = $parser->parse($data);
-                    $saved += $this->storeSide($code, $date, $mKey, $iKey, $parsed['buyers'], 'buy');
-                    $saved += $this->storeSide($code, $date, $mKey, $iKey, $parsed['sellers'], 'sell');
+                    $saved += $this->fetch($client, $parser, $code, $date, $mParam, $iParam, $mKey, $iKey);
                 }
             }
+            // 2) ALL server-side views (stored as market/investor = 'all')
+            $allMarket = ['MARKET_BOARD_ALL' => 'all'];
+            $allInvestor = ['INVESTOR_TYPE_ALL' => 'all'];
+            // market ALL per investor
+            foreach (self::INVESTORS as $iKey => $iParam) {
+                $saved += $this->fetch($client, $parser, $code, $date, 'MARKET_BOARD_ALL', $iParam, 'all', $iKey);
+            }
+            // investor ALL per market
+            foreach (self::MARKETS as $mKey => $mParam) {
+                $saved += $this->fetch($client, $parser, $code, $date, $mParam, 'INVESTOR_TYPE_ALL', $mKey, 'all');
+            }
+            // fully ALL
+            $saved += $this->fetch($client, $parser, $code, $date, 'MARKET_BOARD_ALL', 'INVESTOR_TYPE_ALL', 'all', 'all');
         }
 
         $this->info("broksum:crawl done — {$saved} rows for {$date}");
 
         return self::SUCCESS;
+    }
+
+    private function fetch(StockbitClient $client, StockbitParser $parser, string $code, string $date, string $mParam, string $iParam, string $mKey, string $iKey): int
+    {
+        $data = $client->marketDetector($code, $date, $date, 'TRANSACTION_TYPE_GROSS', $mParam, $iParam);
+
+        if (isset($data['error'])) {
+            $this->warn("{$code}/{$mKey}/{$iKey}: HTTP {$data['error']}");
+
+            return 0;
+        }
+
+        $parsed = $parser->parse($data);
+
+        return $this->storeSide($code, $date, $mKey, $iKey, $parsed['buyers'], 'buy')
+            + $this->storeSide($code, $date, $mKey, $iKey, $parsed['sellers'], 'sell');
     }
 
     private function storeSide(string $code, string $date, string $m, string $i, array $rows, string $side): int
